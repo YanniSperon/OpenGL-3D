@@ -9,11 +9,14 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/euler_angles.hpp"
 #include "primitives/Vertex.h"
 #include "primitives/ShapeGenerator.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
+
+// next vid https://www.youtube.com/watch?v=XA1P4PtXl_Q&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY&index=37
 
 int initialWidth = 1280;
 int initialHeight = 720;
@@ -98,6 +101,7 @@ int main(void)
 		int width;
 		int height;
 		glm::vec3 translation(0.0f, 0.0f, -3.0f);
+		glm::vec3 rotation(0.0f, 0.0f, 0.0f);
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -108,8 +112,8 @@ int main(void)
 
 			ImGui_ImplGlfwGL3_NewFrame();
 
-			glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), translation);
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, 10.0f);
+			glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), translation) * glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
+			glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 10.0f);
 
 			shader.SetUniformMat4f("modelTransformMatrix", modelTransformMatrix);
 			shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
@@ -132,9 +136,9 @@ int main(void)
 				ImGui::SliderFloat("X Translation", &translation.x, -1.0f, 1.0f);
 				ImGui::SliderFloat("Y Translation", &translation.y, -1.0f, 1.0f);
 				ImGui::SliderFloat("Z Translation", &translation.z, -10.0f, 1.0f);
-				/*ImGui::SliderFloat("X Rotation", &rotation.x, 0.0f, 360.0f);
+				ImGui::SliderFloat("X Rotation", &rotation.x, 0.0f, 360.0f);
 				ImGui::SliderFloat("Y Rotation", &rotation.y, 0.0f, 360.0f);
-				ImGui::SliderFloat("Z Rotation", &rotation.z, 0.0f, 360.0f);*/
+				ImGui::SliderFloat("Z Rotation", &rotation.z, 0.0f, 360.0f);
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}
 
