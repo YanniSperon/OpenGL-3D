@@ -76,6 +76,8 @@ int main(void)
 		glGenBuffers(1, &indexBufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+		
+		GLsizei numIndices = (GLsizei) shape.numIndices;
 
 		shape.cleanUp(); // You don't need to keep these values because the coordinates for the shapes will never change.
 		// The only values that will change are what the shader returns based on the MVP
@@ -90,6 +92,8 @@ int main(void)
 		ImGui::CreateContext();
 		ImGui_ImplGlfwGL3_Init(window, true);
 		ImGui::StyleColorsDark();
+
+
 
 		int width;
 		int height;
@@ -110,7 +114,7 @@ int main(void)
 			shader.SetUniformMat4f("modelTransformMatrix", modelTransformMatrix);
 			shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
 
-			glDrawElements(GL_TRIANGLES, (GLsizei)shape.indices, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 
 			/*{
 				glBindVertexArray(vertexArrayObject);
@@ -127,7 +131,7 @@ int main(void)
 			{
 				ImGui::SliderFloat("X Translation", &translation.x, -1.0f, 1.0f);
 				ImGui::SliderFloat("Y Translation", &translation.y, -1.0f, 1.0f);
-				ImGui::SliderFloat("Z Translation", &translation.z, -10.0f, 10.0f);
+				ImGui::SliderFloat("Z Translation", &translation.z, -10.0f, 1.0f);
 				/*ImGui::SliderFloat("X Rotation", &rotation.x, 0.0f, 360.0f);
 				ImGui::SliderFloat("Y Rotation", &rotation.y, 0.0f, 360.0f);
 				ImGui::SliderFloat("Z Rotation", &rotation.z, 0.0f, 360.0f);*/
