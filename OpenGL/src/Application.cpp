@@ -57,8 +57,25 @@ int main(void)
 		glEnable(GL_DEPTH_TEST);
 		
 
-		ShapeData shape = ShapeGenerator::makeCube();
+		//ShapeData shape = ShapeGenerator::makeCube();
+		ShapeData shape = ShapeGenerator::loadShape("airplane.obj");
 
+		std::cout << "-------------------------" << std::endl;
+
+		for (unsigned int i = 0; i < shape.numVertices; i++) {
+			std::cout << "Vertex: " << shape.vertices[i].position.x << ", " << shape.vertices[i].position.y << ", " << shape.vertices[i].position.z << "\n";
+			std::cout << "Color: " << shape.vertices[i].color.r << ", " << shape.vertices[i].color.g << ", " << shape.vertices[i].color.b << "\n";
+		}
+
+		std::cout << "-------------------------" << std::endl;
+		for (unsigned int i = 0; i < shape.numIndices; i += 3) {
+			std::cout << "Index: " << shape.indices[i] << ", " << shape.indices[i + 1] << ", " << shape.indices[i + 2] << "\n";
+		}
+
+		std::cout << "-------------------------" << std::endl;
+		std::cout << shape.numVertices << std::endl;
+		std::cout << shape.numIndices << std::endl;
+		std::cout << "-------------------------" << std::endl;
 
 		GLuint vertexBufferID;
 		glGenBuffers(1, &vertexBufferID);
@@ -113,7 +130,7 @@ int main(void)
 			ImGui_ImplGlfwGL3_NewFrame();
 
 			glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), translation) * glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 10.0f);
+			glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 			shader.SetUniformMat4f("modelTransformMatrix", modelTransformMatrix);
 			shader.SetUniformMat4f("projectionMatrix", projectionMatrix);

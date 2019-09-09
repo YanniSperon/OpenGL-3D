@@ -1,6 +1,12 @@
 #include "ShapeGenerator.h"
 #include "glm/glm.hpp"
 #include "Vertex.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <strstream>
+
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a);
 
 ShapeData ShapeGenerator::makeTriangle() {
@@ -145,6 +151,75 @@ ShapeData ShapeGenerator::makeCube()
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
 	ret.indices = new GLuint[ret.numIndices];
 	memcpy(ret.indices, indices, sizeof(indices));
+
+	return ret;
+}
+
+ShapeData ShapeGenerator::loadShape(std::string fileName)
+{
+	ShapeData ret;
+
+	std::vector<Vertex> positions;
+	std::vector<GLuint> indices;
+
+	std::ifstream f(fileName);
+
+	unsigned int positionsSize = 0;
+	unsigned int indicesSize = 0;
+
+	if (!f.is_open()) {
+		return ret;
+	}
+
+	while (!f.eof())
+	{
+		char line[128];
+		f.getline(line, 128);
+
+		std::strstream s;
+		s << line;
+
+		char junk;
+
+		if (line[0] == 'v')
+		{
+			glm::vec3 v;
+			s >> junk >> v.x >> v.y >> v.z;
+			Vertex vert;
+			vert.position = v;
+			vert.color = glm::vec3(1.0f, 1.0f, 1.0f);
+			positions.push_back(vert);
+			std::cout << "Vertex: " << v.x << ", " << v.y << ", " << v.z << std::endl;
+			std::cout << "Color: " << vert.color.r << ", " << vert.color.g << ", " << vert.color.b << std::endl;
+			positionsSize += 1;
+		}
+
+		if (line[0] == 'f')
+		{
+			int f[3];
+			s >> junk >> f[0] >> f[1] >> f[2];
+			indices.push_back(f[0] - 1);
+			indices.push_back(f[1] - 1);
+			indices.push_back(f[2] - 1);
+			std::cout << "Index: " << f[0]-1 << ", " << f[1] - 1 << ", " << f[2] - 1 << std::endl;
+			indicesSize += 1;
+		}
+	}
+
+	std::cout << positionsSize << std::endl;
+	std::cout << indicesSize << std::endl;
+
+	ret.numVertices = positionsSize;
+	ret.vertices = new Vertex[positionsSize];
+	for (unsigned int i = 0; i < positionsSize; i++) {
+		ret.vertices[i] = positions[i];
+	}
+
+	ret.numIndices = indicesSize;
+	ret.indices = new GLuint[indicesSize];
+	for (unsigned int i = 0; i < indicesSize; i++) {
+		ret.indices[i] = indices[i];
+	}
 
 	return ret;
 }
