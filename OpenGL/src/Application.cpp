@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "Shader.h"
+#include "primitives/Mesh.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -19,8 +20,8 @@
 
 // next vid https://www.youtube.com/watch?v=XA1P4PtXl_Q&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY&index=37
 
-int initialWidth = 1920;
-int initialHeight = 1080;
+int initialWidth = 1280;
+int initialHeight = 720;
 
 
 
@@ -36,13 +37,13 @@ static bool shiftPressed = false;
 static int currentWidth = initialWidth;
 static int currentHeight = initialHeight;
 
-static glm::vec3 viewDirection(0.0f, 0.0f, -1.0f);
-static glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
 
 static int oldMouseX = 0;
 static int oldMouseY = 0;
 static float mouseSensitivity = 0.005f;
 static float movementSpeed = 0.1f;
+
+Mesh mesh = Mesh(type::blankModel, "", "airplane.obj");
 
 static bool movementEnabled = true;
 
@@ -110,21 +111,7 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 
 static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	if (movementEnabled) {
-		glm::vec2 mouseDelta(xpos - oldMouseX, ypos - oldMouseY);
-
-		glm::vec3 toRotateAround = glm::cross(viewDirection, upDirection);
-
-		viewDirection = glm::mat3(
-			glm::rotate(glm::mat4(1.0f), -mouseDelta.x * mouseSensitivity, upDirection) *
-			glm::rotate(glm::mat4(1.0f), -mouseDelta.y * mouseSensitivity, toRotateAround)
-		) * viewDirection;
-
-		viewDirection = glm::mat3() * viewDirection;
-
-		oldMouseX = xpos;
-		oldMouseY = ypos;
-	}
+	camera.LookAt(xpos, ypos);
 }
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -184,7 +171,6 @@ int main(void)
 		
 
 
-		//ShapeData shape = ShapeGenerator::makeCube();
 		ShapeData shape = ShapeGenerator::loadShape("airplane.obj");
 
 
@@ -270,7 +256,7 @@ int main(void)
 				projectionMatrix = glm::perspective(glm::radians(90.0f), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
 
-			glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), objectTranslation) * glm::yawPitchRoll(glm::radians(objectRotation.x), glm::radians(objectRotation.y), glm::radians(objectRotation.z));
+			glm::mat4 modelTransformMatrix = mesh.GetModelTransformMatrix();
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
@@ -293,7 +279,8 @@ int main(void)
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}
 			
-
+			mesh.rotatev(objectRotation);
+			mesh.translatev(objectTranslation);
 
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
