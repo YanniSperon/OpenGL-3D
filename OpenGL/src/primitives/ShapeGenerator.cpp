@@ -1,11 +1,11 @@
 #include "ShapeGenerator.h"
 #include "glm/glm.hpp"
 #include "Vertex.h"
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <strstream>
+#include <iostream>
 
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a);
 
@@ -132,7 +132,7 @@ ShapeData ShapeGenerator::makeCube()
 	GLuint indices[] = {
 		0, 1, 2, // Top face
 		0, 2, 3,
-		
+
 		4, 5, 6, // Front face
 		4, 6, 7,
 
@@ -194,7 +194,7 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 
 		if (line[0] == 'f')
 		{
-			int f[3];
+			unsigned int f[3];
 			s >> junk >> f[0] >> f[1] >> f[2];
 			indices.push_back(f[0] - 1);
 			indices.push_back(f[1] - 1);
@@ -211,8 +211,107 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 
 	ret.numIndices = indicesSize;
 	ret.indices = new GLuint[indicesSize];
-	for (unsigned int i = 0; i < indicesSize; i++) {
-		ret.indices[i] = indices[i];
+	for (unsigned int k = 0; k < indicesSize; k++) {
+		ret.indices[k] = indices[k];
+	}
+
+	return ret;
+}
+
+ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string name)
+{
+	ShapeData ret;
+
+	std::vector<Vertex> positions;
+	std::vector<GLuint> indices;
+
+	std::string fileName = directory + name;
+
+	std::ifstream obj(fileName);
+
+	unsigned int positionsSize = 0;
+	unsigned int indicesSize = 0;
+
+	if (!obj.is_open()) {
+		return ret;
+	}
+
+	std::string mtlName;
+
+	while (!obj.eof())
+	{
+		char line[128];
+		obj.getline(line, 128);
+
+		std::strstream s;
+		s << line;
+
+		std::string str(line);
+
+		char junk;
+
+		// Load materials from mtl file
+		if (str.find("mtllib") != std::string::npos)
+		{
+			mtlName = str.substr(str.find("mtllib") + 7);
+			std::cout << mtlName << std::endl;
+			std::ifstream mtl(mtlName);
+
+			std::string mtlFileName = directory + mtlName;
+
+			bool fileLoadedProperly = true;
+
+			if (!mtl.is_open()) {
+				std::cout << "Error loading mtl file: \"" << mtlFileName << "\"\n";
+				fileLoadedProperly = false;
+			}
+			while (!mtl.eof() && fileLoadedProperly)
+			{
+				char lineMTL[128];
+				mtl.getline(lineMTL, 128);
+
+				std::strstream sMTL;
+				sMTL << lineMTL;
+
+				std::string str(lineMTL);
+
+				char junk;
+				std::cout << "Loaded mtl file and grabbed line: " << lineMTL << "\n";
+			}
+		}
+		// finished loading materials from mtl, now scan obj file for information referencing that file.
+		//else if (str.find())
+		else if (line[0] == 'v')
+		{
+			glm::vec3 v;
+			s >> junk >> v.x >> v.y >> v.z;
+			Vertex vert;
+			vert.position = v;
+			vert.color = glm::vec3(1.0f, 0.0f, 1.0f);
+			positions.push_back(vert);
+			positionsSize += 1;
+		}
+		else if (line[0] == 'f')
+		{
+			unsigned int f[3];
+			s >> junk >> f[0] >> f[1] >> f[2];
+			indices.push_back(f[0] - 1);
+			indices.push_back(f[1] - 1);
+			indices.push_back(f[2] - 1);
+			indicesSize += 3;
+		}
+	}
+
+	ret.numVertices = positionsSize;
+	ret.vertices = new Vertex[positionsSize];
+	for (unsigned int i = 0; i < positionsSize; i++) {
+		ret.vertices[i] = positions[i];
+	}
+
+	ret.numIndices = indicesSize;
+	ret.indices = new GLuint[indicesSize];
+	for (unsigned int k = 0; k < indicesSize; k++) {
+		ret.indices[k] = indices[k];
 	}
 
 	return ret;

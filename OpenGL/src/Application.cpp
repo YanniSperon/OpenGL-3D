@@ -30,11 +30,21 @@ static bool wPressed = false;
 static bool sPressed = false;
 static bool aPressed = false;
 static bool dPressed = false;
+static bool spacePressed = false;
+static bool shiftPressed = false;
 
 static int currentWidth = initialWidth;
 static int currentHeight = initialHeight;
 
-static glm::vec3 cameraRotation(0.0f, 0.0f, 0.0f);
+static glm::vec3 viewDirection(0.0f, 0.0f, -1.0f);
+static glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
+
+static int oldMouseX = 0;
+static int oldMouseY = 0;
+static float mouseSensitivity = 0.005f;
+static float movementSpeed = 0.1f;
+
+static bool movementEnabled = true;
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -67,14 +77,54 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 	else if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
 		dPressed = false;
 	}
+
+
+
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		spacePressed = true;
+	}
+	else if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
+		spacePressed = false;
+	}
+
+	if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
+		shiftPressed = true;
+	}
+	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
+		shiftPressed = false;
+	}
+
+
+
+
+
+	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+		movementEnabled = false;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+		movementEnabled = true;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 }
 
 static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	std::cout << "x: " << xpos << "\n";
-	std::cout << "y: " << ypos << "\n";
-	cameraRotation.x = xpos;
-	cameraRotation.y = ypos;
+	if (movementEnabled) {
+		glm::vec2 mouseDelta(xpos - oldMouseX, ypos - oldMouseY);
+
+		glm::vec3 toRotateAround = glm::cross(viewDirection, upDirection);
+
+		viewDirection = glm::mat3(
+			glm::rotate(glm::mat4(1.0f), -mouseDelta.x * mouseSensitivity, upDirection) *
+			glm::rotate(glm::mat4(1.0f), -mouseDelta.y * mouseSensitivity, toRotateAround)
+		) * viewDirection;
+
+		viewDirection = glm::mat3() * viewDirection;
+
+		oldMouseX = xpos;
+		oldMouseY = ypos;
+	}
 }
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -182,7 +232,6 @@ int main(void)
 		glm::vec3 objectTranslation(0.0f, 0.0f, -3.0f);
 		glm::vec3 objectRotation(0.0f, 0.0f, 0.0f);
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
-		cameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
@@ -191,47 +240,37 @@ int main(void)
 			ImGui_ImplGlfwGL3_NewFrame();
 
 
-
-			if (wPressed) {
-				cameraTranslation.z += 0.05f;
+			if (movementEnabled) {
+				if (wPressed) {
+					cameraTranslation += movementSpeed * viewDirection;
+				}
+				if (sPressed) {
+					cameraTranslation += -movementSpeed * viewDirection;
+				}
+				if (aPressed) {
+					glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
+					cameraTranslation += -movementSpeed * strafeDirection;
+				}
+				if (dPressed) {
+					glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
+					cameraTranslation += movementSpeed * strafeDirection;
+				}
+				if (spacePressed) {
+					cameraTranslation += movementSpeed * upDirection;
+				}
+				if (shiftPressed) {
+					cameraTranslation += -movementSpeed * upDirection;
+				}
 			}
-			if (sPressed) {
-				cameraTranslation.z -= 0.05f;
-			}
-			if (aPressed) {
-				cameraTranslation.x += 0.05f;
-			}
-			if (dPressed) {
-				cameraTranslation.x -= 0.05f;
-			}
-
-
-
-			glm::mat4 modelTransformMatrix = glm::yawPitchRoll(glm::radians(objectRotation.x), glm::radians(objectRotation.y), glm::radians(objectRotation.z))* glm::translate(glm::mat4(), objectTranslation);
 			
-
-			/////////////////////////////////////////
-			glm::mat4 viewMatrix; //= glm::yawPitchRoll(glm::radians(cameraRotation.y), glm::radians(cameraRotation.y), glm::radians(cameraRotation.x)) * glm::translate(glm::mat4(), cameraTranslation);
-			glm::quat qPitch = glm::angleAxis(glm::radians(cameraRotation.y), glm::vec3(1, 0, 0));
-			glm::quat qYaw = glm::angleAxis(glm::radians(cameraRotation.x), glm::vec3(0, 1, 0));
-
-			glm::quat orientation = qPitch * qYaw;
-			orientation = glm::normalize(orientation);
-			glm::mat4 rotate = glm::mat4_cast(orientation);
-
-			glm::mat4 translate = glm::mat4(1.0f);
-			//glm::vec3 rotatedCameraTranslation = glm::rotate()
-			translate = glm::translate(translate, -cameraTranslation);
-
-			viewMatrix = rotate * translate;
-			/////////////////////////////////////////
-
+			glm::mat4 viewMatrix = glm::lookAt(cameraTranslation, cameraTranslation + viewDirection, upDirection);
 
 			glm::mat4 projectionMatrix;
 			if (currentWidth > 0 && currentHeight > 0) {
 				projectionMatrix = glm::perspective(glm::radians(90.0f), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
 
+			glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), objectTranslation) * glm::yawPitchRoll(glm::radians(objectRotation.x), glm::radians(objectRotation.y), glm::radians(objectRotation.z));
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
@@ -250,10 +289,6 @@ int main(void)
 				ImGui::SliderFloat("Object X Rotation", &objectRotation.x, 0.0f, 360.0f);
 				ImGui::SliderFloat("Object Y Rotation", &objectRotation.y, 0.0f, 360.0f);
 				ImGui::SliderFloat("Object Z Rotation", &objectRotation.z, 0.0f, 360.0f);
-				
-				ImGui::SliderFloat("Camera X Rotation", &cameraRotation.x, 0.0f, 360.0f);
-				ImGui::SliderFloat("Camera Y Rotation", &cameraRotation.y, 0.0f, 360.0f);
-				ImGui::SliderFloat("Camera Z Rotation", &cameraRotation.z, 0.0f, 360.0f);
 
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}

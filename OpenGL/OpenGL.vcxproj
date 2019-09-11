@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\primitives\ShapeGenerator.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -253,6 +254,7 @@
     <None Include="src\vendor\glm\gtx\wrap.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\primitives\ShapeGenerator.h" />
     <ClInclude Include="src\primitives\ShapeData.h" />
     <ClInclude Include="src\primitives\Vertex.h" />
