@@ -189,8 +189,6 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 			vert.position = v;
 			vert.color = glm::vec3(1.0f, 1.0f, 1.0f);
 			positions.push_back(vert);
-			std::cout << "Vertex: " << v.x << ", " << v.y << ", " << v.z << std::endl;
-			std::cout << "Color: " << vert.color.r << ", " << vert.color.g << ", " << vert.color.b << std::endl;
 			positionsSize += 1;
 		}
 
@@ -201,13 +199,9 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 			indices.push_back(f[0] - 1);
 			indices.push_back(f[1] - 1);
 			indices.push_back(f[2] - 1);
-			std::cout << "Index: " << f[0]-1 << ", " << f[1] - 1 << ", " << f[2] - 1 << std::endl;
-			indicesSize += 1;
+			indicesSize += 3;
 		}
 	}
-
-	std::cout << positionsSize << std::endl;
-	std::cout << indicesSize << std::endl;
 
 	ret.numVertices = positionsSize;
 	ret.vertices = new Vertex[positionsSize];
