@@ -9,6 +9,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Config.h"
+#include "Object.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -41,7 +42,6 @@ static int oldMouseY = 0;
 static float movementSpeed = 0.1f;
 
 Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), mouseSensitivity);
-Mesh mesh = Mesh(type::blankModel, "", "airplane.obj");
 
 static int initialWidth = config.getInitialWidthPreference();
 static int initialHeight = config.getInitialHeightPreference();
@@ -173,19 +173,22 @@ int main(void)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 
+		Object object = Object(type::blankModel, "", "airplane.obj");
+		object.GLInit();
+
 
 		//////////////////////////COPIED//////////////////////////
-		GLuint vertexBufferID;
-		glGenBuffers(1, &vertexBufferID);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-		glBufferData(GL_ARRAY_BUFFER, mesh.GetShape().vertexBufferSize(), mesh.GetShape().vertices, GL_STATIC_DRAW);
+		//GLuint vertexBufferID;
+		//glGenBuffers(1, &vertexBufferID);
+		//glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+		//glBufferData(GL_ARRAY_BUFFER, mesh.GetShape().vertexBufferSize(), mesh.GetShape().vertices, GL_STATIC_DRAW);
 		//////////////////////////////////////////////////////////
 
 		//////////////////////////COPIED//////////////////////////
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+		//glEnableVertexAttribArray(0);
+		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+		//glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
 		// index, amount of values, type of value, normalize? (not sure what that means), step (distance in bytes between each starting
 		// point of data), starting point (amount of bytes to skip from the beginning of the data set to begin the desired data set i.e.
 		// skipping the vertices to get the color for the color attribpointer.
@@ -193,21 +196,21 @@ int main(void)
 
 
 		//////////////////////////COPIED//////////////////////////
-		GLuint indexBufferID;
-		glGenBuffers(1, &indexBufferID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetShape().indexBufferSize(), mesh.GetShape().indices, GL_STATIC_DRAW);
+		//GLuint indexBufferID;
+		//glGenBuffers(1, &indexBufferID);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetShape().indexBufferSize(), mesh.GetShape().indices, GL_STATIC_DRAW);
 		
-		GLsizei numIndices = (GLsizei) mesh.GetShape().numIndices;
+		//GLsizei numIndices = (GLsizei) mesh.GetShape().numIndices;
 		//////////////////////////////////////////////////////////
 
-		mesh.GetShape().cleanUp(); // You don't need to keep these values because the coordinates for the shapes will never change.
+		//mesh.GetShape().cleanUp(); // You don't need to keep these values because the coordinates for the shapes will never change.
 		// The only values that will change are what the shader returns based on the MVP
 		
 
 		//////////////////////////COPIED//////////////////////////
-		Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
+		//Shader shader("res/shaders/Basic.shader");
+		//shader.Bind();
 		//////////////////////////////////////////////////////////
 
 
@@ -215,10 +218,6 @@ int main(void)
 		ImGui_ImplGlfwGL3_Init(window, false);
 		ImGui::StyleColorsDark();
 
-
-
-		int width;
-		int height;
 		glm::vec3 objectTranslation(0.0f, 0.0f, -3.0f);
 		glm::vec3 objectRotation(0.0f, 0.0f, 0.0f);
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
@@ -258,19 +257,16 @@ int main(void)
 			if (currentWidth > 0 && currentHeight > 0) {
 				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
-			glm::mat4 modelTransformMatrix = mesh.GetModelTransformMatrix();
+			glm::mat4 modelTransformMatrix = object.GetModelTransformMatrix();
 
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
-			shader.SetUniformMat4f("MVP", MVP);
 
 
 
-
-			//////////////////////////////////////////////////////////
-			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
-			//////////////////////////////////////////////////////////
+			object.SetUniformMat4("MVP", MVP);
+			object.Draw();
 
 
 			{
@@ -284,8 +280,8 @@ int main(void)
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}
 			
-			mesh.rotatev(objectRotation);
-			mesh.translatev(objectTranslation);
+			object.RotateVec3(objectRotation);
+			object.TranslateVec3(objectTranslation);
 
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());

@@ -48,7 +48,12 @@ ShaderProgramSource Shader::ParseShader(const std::string& filepath)
 		}
 		else
 		{
-			ss[(int)type] << line << '\n';
+			try {
+				ss[(int)type] << line << '\n';
+			}
+			catch (std::exception) {
+				std::cout << "FAILED\n";
+			}
 		}
 	}
 
@@ -68,7 +73,13 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 	{
 		int length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
+		char* message;
+		try {
+			message = (char*)alloca(length * sizeof(char));
+		}
+		catch (std::exception) {
+			message = "FAILED";
+		}
 		glGetShaderInfoLog(id, length, &length, message);
 		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
 		std::cout << message << std::endl;
@@ -89,6 +100,26 @@ unsigned int Shader::CreateShader(const std::string& vertexShader, const std::st
 	glAttachShader(program, fs);
 	glLinkProgram(program);
 	glValidateProgram(program);
+
+	GLint i;
+	GLint count;
+
+	GLint size; // size of the variable
+	GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+	const GLsizei bufSize = 16; // maximum name length
+	GLchar name[bufSize]; // variable name in GLSL
+	GLsizei length; // name length
+
+	glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+	printf("Active Uniforms: %d\n", count);
+
+	for (i = 0; i < count; i++)
+	{
+		glGetActiveUniform(program, (GLuint)i, bufSize, &length, &size, &type, name);
+
+		printf("Uniform #%d Type: %u Name: \"%s\"\n", i, type, name);
+	}
 
 	glDeleteShader(vs);
 	glDeleteShader(fs);
@@ -141,6 +172,7 @@ int Shader::GetUniformLocation(const std::string& name)
 	if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 		return m_UniformLocationCache[name];
 
+	std::cout << m_RendererID << std::endl;
 	int location = glGetUniformLocation(m_RendererID, name.c_str());
 	if (location == -1)
 		std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;

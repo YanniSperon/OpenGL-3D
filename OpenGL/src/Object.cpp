@@ -1,6 +1,7 @@
 #include "Object.h"
 #include "GLFW/glfw3.h"
 #include <iostream>
+#include "glm/gtc/matrix_transform.hpp"
 
 Object::Object()
 	: mesh(type::triangle, "", ""), vertexArrayObjectID(0), vertexBufferID(0), indexBufferID(0), numIndices(0), shader()
@@ -9,7 +10,7 @@ Object::Object()
 }
 
 Object::Object(type type, std::string dir, std::string name)
-	: mesh(type, dir, name), vertexArrayObjectID(0), vertexBufferID(0), indexBufferID(0), numIndices(0), shader()
+	: mesh(type, dir, name), vertexArrayObjectID(0), vertexBufferID(0), indexBufferID(0), numIndices(0), shader("res/shaders/Basic.shader")
 {
 	
 }
@@ -21,29 +22,39 @@ Object::~Object()
 
 void Object::GLInit()
 {
-	///////////////////////////////////////////////////////////////create vao//////////////////////////////////////////////////////
-	//glGenVertexArrays(1, &vertexArrayObjectID);
-	//glBindVertexArray(vertexArrayObjectID);
-	///////////////////////////////////////////////////////////////create vb///////////////////////////////////////////////////////
+	std::cout << "GLINIT\n";
+	glGenVertexArrays(1, &vertexArrayObjectID);
+
+	
+
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, mesh.GetShape().vertexBufferSize(), mesh.GetShape().vertices, GL_STATIC_DRAW);
-	///////////////////////////////////////////////////////////////create vaa//////////////////////////////////////////////////////
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
-	///////////////////////////////////////////////////////////////create ib///////////////////////////////////////////////////////
+
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetShape().indexBufferSize(), mesh.GetShape().indices, GL_STATIC_DRAW);
-	numIndices = (GLsizei)mesh.GetShape().numIndices;
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	shader = Shader("res/shaders/Basic.shader");
-	shader.Bind();
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	GLsizei numIndices = (GLsizei)mesh.GetShape().numIndices;
 	mesh.GetShape().cleanUp();
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	glBindVertexArray(vertexArrayObjectID);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+	shader.Bind();
 }
 
 void Object::Rotate3f(float x, float y, float z)
@@ -70,17 +81,12 @@ void Object::Draw()
 {
 	Bind();
 	shader.Bind();
-	shader.SetUniformMat4f("MVP", GetModelTransformMatrix());
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
 
 void Object::Bind()
 {
-	//glBindVertexArray(vertexArrayObjectID);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+	glBindVertexArray(vertexArrayObjectID);
 }
 
 void Object::Unbind()
@@ -106,7 +112,6 @@ glm::mat4 Object::GetModelTransformMatrix()
 
 void Object::SetUniformMat4(const std::string& name, glm::mat4 mat)
 {
-	Bind();
 	//std::cout << "set uniform\n";
 	shader.Bind();
 	shader.SetUniformMat4f(name, mat);
