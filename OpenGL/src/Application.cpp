@@ -6,7 +6,9 @@
 #include <sstream>
 
 #include "Shader.h"
-#include "primitives/Mesh.h"
+#include "Mesh.h"
+#include "Camera.h"
+#include "Config.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -20,32 +22,32 @@
 
 // next vid https://www.youtube.com/watch?v=XA1P4PtXl_Q&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY&index=37
 
-int initialWidth = 1280;
-int initialHeight = 720;
+Config config = Config("", "config.txt");
 
-
-
-static bool fullscreen = false;
+static bool fullscreen = config.getFullscreenPreference();
+static float mouseSensitivity = config.getMouseSensitivityPreference();
+static float FOV = config.getFOVPreference();
 
 static bool wPressed = false;
 static bool sPressed = false;
 static bool aPressed = false;
 static bool dPressed = false;
 static bool spacePressed = false;
+static bool controlPressed = false;
 static bool shiftPressed = false;
-
-static int currentWidth = initialWidth;
-static int currentHeight = initialHeight;
-
 
 static int oldMouseX = 0;
 static int oldMouseY = 0;
-static float mouseSensitivity = 0.005f;
 static float movementSpeed = 0.1f;
 
+Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), mouseSensitivity);
 Mesh mesh = Mesh(type::blankModel, "", "airplane.obj");
 
-static bool movementEnabled = true;
+static int initialWidth = config.getInitialWidthPreference();
+static int initialHeight = config.getInitialHeightPreference();
+
+static int currentWidth = initialWidth;
+static int currentHeight = initialHeight;
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -88,11 +90,18 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 		spacePressed = false;
 	}
 
+	if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS) {
+		controlPressed = true;
+	}
+	else if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_RELEASE) {
+		controlPressed = false;
+	}
+
 	if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
-		shiftPressed = true;
+		movementSpeed *= 2;
 	}
 	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
-		shiftPressed = false;
+		movementSpeed /= 2;
 	}
 
 
@@ -100,20 +109,18 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 
 
 	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-		movementEnabled = false;
+		camera.DisableMovementControls();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
-		movementEnabled = true;
+		camera.EnableMovementControls();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 }
-
 static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
 	camera.LookAt(xpos, ypos);
 }
-
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	currentWidth = width;
@@ -127,12 +134,10 @@ int main(void)
 {
 	GLFWwindow* window;
 
-	/* Initialize the library */
 	if (!glfwInit()) {
 		return -1;
 	}
 
-	/* Create a windowed mode window and its OpenGL context */
 	if (fullscreen) {
 		window = glfwCreateWindow(initialWidth, initialHeight, "Atlas", glfwGetPrimaryMonitor(), NULL);
 	}
@@ -146,10 +151,9 @@ int main(void)
 		return -1;
 	}
 
-	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
-	glfwSwapInterval(1); // Enable v-sync
+	glfwSwapInterval(1);
 
 	if (glewInit() != GLEW_OK) {
 		std::cout << "Error!" << std::endl;
@@ -158,7 +162,7 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	{
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // disable the cursor to allow infinite movement
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		if (glfwRawMouseMotionSupported())
 			glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 		glfwSetCursorPosCallback(window, cursorPositionCallback);
@@ -168,18 +172,16 @@ int main(void)
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
-		
 
 
-		ShapeData shape = ShapeGenerator::loadShape("airplane.obj");
-
-
-
+		//////////////////////////COPIED//////////////////////////
 		GLuint vertexBufferID;
 		glGenBuffers(1, &vertexBufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-		glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mesh.GetShape().vertexBufferSize(), mesh.GetShape().vertices, GL_STATIC_DRAW);
+		//////////////////////////////////////////////////////////
 
+		//////////////////////////COPIED//////////////////////////
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 		glEnableVertexAttribArray(1);
@@ -187,24 +189,26 @@ int main(void)
 		// index, amount of values, type of value, normalize? (not sure what that means), step (distance in bytes between each starting
 		// point of data), starting point (amount of bytes to skip from the beginning of the data set to begin the desired data set i.e.
 		// skipping the vertices to get the color for the color attribpointer.
+		//////////////////////////////////////////////////////////
 
 
-
+		//////////////////////////COPIED//////////////////////////
 		GLuint indexBufferID;
 		glGenBuffers(1, &indexBufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetShape().indexBufferSize(), mesh.GetShape().indices, GL_STATIC_DRAW);
 		
-		GLsizei numIndices = (GLsizei) shape.numIndices;
+		GLsizei numIndices = (GLsizei) mesh.GetShape().numIndices;
+		//////////////////////////////////////////////////////////
 
-		shape.cleanUp(); // You don't need to keep these values because the coordinates for the shapes will never change.
+		mesh.GetShape().cleanUp(); // You don't need to keep these values because the coordinates for the shapes will never change.
 		// The only values that will change are what the shader returns based on the MVP
 		
 
-
+		//////////////////////////COPIED//////////////////////////
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
-
+		//////////////////////////////////////////////////////////
 
 
 		ImGui::CreateContext();
@@ -219,44 +223,43 @@ int main(void)
 		glm::vec3 objectRotation(0.0f, 0.0f, 0.0f);
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
-		/* Loop until the user closes the window */
+
+
+
 		while (!glfwWindowShouldClose(window))
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 			ImGui_ImplGlfwGL3_NewFrame();
 
 
-			if (movementEnabled) {
-				if (wPressed) {
-					cameraTranslation += movementSpeed * viewDirection;
-				}
-				if (sPressed) {
-					cameraTranslation += -movementSpeed * viewDirection;
-				}
-				if (aPressed) {
-					glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
-					cameraTranslation += -movementSpeed * strafeDirection;
-				}
-				if (dPressed) {
-					glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
-					cameraTranslation += movementSpeed * strafeDirection;
-				}
-				if (spacePressed) {
-					cameraTranslation += movementSpeed * upDirection;
-				}
-				if (shiftPressed) {
-					cameraTranslation += -movementSpeed * upDirection;
-				}
+			if (wPressed) {
+				camera.MoveForward();
 			}
-			
-			glm::mat4 viewMatrix = glm::lookAt(cameraTranslation, cameraTranslation + viewDirection, upDirection);
+			if (sPressed) {
+				camera.MoveBackward();
+			}
+			if (aPressed) {
+				camera.StrafeLeft();
+			}
+			if (dPressed) {
+				camera.StrafeRight();
+			}
+			if (spacePressed) {
+				camera.MoveUp();
+			}
+			if (controlPressed) {
+				camera.MoveDown();
+			}
 
+			camera.ChangeMovementSpeed(movementSpeed);
+			
+			glm::mat4 viewMatrix = camera.GetViewTransformMatrix();
 			glm::mat4 projectionMatrix;
 			if (currentWidth > 0 && currentHeight > 0) {
-				projectionMatrix = glm::perspective(glm::radians(90.0f), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
+				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
-
 			glm::mat4 modelTransformMatrix = mesh.GetModelTransformMatrix();
+
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
@@ -264,8 +267,10 @@ int main(void)
 
 
 
-			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 
+			//////////////////////////////////////////////////////////
+			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+			//////////////////////////////////////////////////////////
 
 
 			{

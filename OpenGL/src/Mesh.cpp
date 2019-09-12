@@ -1,7 +1,7 @@
 #include "Mesh.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/euler_angles.hpp"
-#include "ShapeGenerator.h"
+#include "primitives/ShapeGenerator.h"
 
 Mesh::Mesh(type type, std::string dir, std::string name)
 	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), shape()
@@ -50,4 +50,14 @@ void Mesh::translate3f(float x, float y, float z)
 
 void Mesh::translatev(glm::vec3 trans) {
 	translation = trans;
+}
+
+ShapeData Mesh::GetShape()
+{
+	return shape;
+}
+
+void Mesh::SetShape(ShapeData newShape)
+{
+	shape = newShape;
 }

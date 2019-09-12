@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "ShapeData.h"
+#include "primitives/ShapeData.h"
 #include <string>
 
 enum type
@@ -25,4 +25,6 @@ public:
 	void rotatev(glm::vec3 rot);
 	void translate3f(float x, float y, float z);
 	void translatev(glm::vec3 trans);
+	ShapeData GetShape();
+	void SetShape(ShapeData newShape);
 };
