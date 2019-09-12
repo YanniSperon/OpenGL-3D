@@ -2,14 +2,18 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/euler_angles.hpp"
 #include "primitives/ShapeGenerator.h"
+#include <iostream>
+
+Mesh::Mesh()
+	: directory(""), fileName("Error"), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), shape()
+{
+
+}
 
 Mesh::Mesh(type type, std::string dir, std::string name)
-	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), shape()
+	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f)
 {
-	if (type == type::triangle) {
-		shape = ShapeGenerator::makeTriangle();
-	}
-	else if (type == type::cubeModel) {
+	if (type == type::cubeModel) {
 		shape = ShapeGenerator::makeCube();
 	}
 	else if (type == type::blankModel) {
@@ -17,6 +21,9 @@ Mesh::Mesh(type type, std::string dir, std::string name)
 	}
 	else if (type == type::texturedModel) {
 		shape = ShapeGenerator::loadTexturedShape(dir, name);
+	}
+	else {
+		shape = ShapeGenerator::makeTriangle();
 	}
 }
 
@@ -30,25 +37,25 @@ glm::mat4 Mesh::GetModelTransformMatrix()
 	return (glm::translate(glm::mat4(), translation) * glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z)));
 }
 
-void Mesh::rotate3f(float x, float y, float z)
+void Mesh::Rotate3f(float x, float y, float z)
 {
 	rotation.x = x;
 	rotation.y = y;
 	rotation.z = z;
 }
 
-void Mesh::rotatev(glm::vec3 rot) {
+void Mesh::RotateVec3(glm::vec3 rot) {
 	rotation = rot;
 }
 
-void Mesh::translate3f(float x, float y, float z)
+void Mesh::Translate3f(float x, float y, float z)
 {
 	translation.x = x;
 	translation.y = y;
 	translation.z = z;
 }
 
-void Mesh::translatev(glm::vec3 trans) {
+void Mesh::TranslateVec3(glm::vec3 trans) {
 	translation = trans;
 }
 

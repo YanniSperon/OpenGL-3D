@@ -4,6 +4,11 @@
 #include <sstream>
 #include <string>
 
+Config::Config(std::string name)
+{
+	LoadConfig("", name);
+}
+
 Config::Config(std::string dir, std::string name)
 {
 	LoadConfig(dir, name);

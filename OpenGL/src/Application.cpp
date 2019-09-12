@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "Config.h"
 #include "Object.h"
+//#include "Mesh.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -42,6 +43,7 @@ static int oldMouseY = 0;
 static float movementSpeed = 0.1f;
 
 Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), mouseSensitivity);
+//Mesh mesh = Mesh(type::blankModel, "", "airplane.obj");
 
 static int initialWidth = config.getInitialWidthPreference();
 static int initialHeight = config.getInitialHeightPreference();
@@ -174,7 +176,7 @@ int main(void)
 		glEnable(GL_DEPTH_TEST);
 
 		Object object = Object(type::blankModel, "", "airplane.obj");
-		object.GLInit();
+		//object.GLInit();
 
 
 		//////////////////////////COPIED//////////////////////////
@@ -218,13 +220,13 @@ int main(void)
 		ImGui_ImplGlfwGL3_Init(window, false);
 		ImGui::StyleColorsDark();
 
-		glm::vec3 objectTranslation(0.0f, 0.0f, -3.0f);
+		glm::vec3 objectTranslation(0.0f, 0.0f, 3.0f);
 		glm::vec3 objectRotation(0.0f, 0.0f, 0.0f);
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
 
 
-
+		bool boal = false;
 		while (!glfwWindowShouldClose(window))
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -258,7 +260,7 @@ int main(void)
 				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
 			glm::mat4 modelTransformMatrix = object.GetModelTransformMatrix();
-
+			
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
@@ -266,8 +268,8 @@ int main(void)
 
 
 			object.SetUniformMat4("MVP", MVP);
-			object.Draw();
 
+			glDrawElements(GL_TRIANGLES, object.GetNumIndices(), GL_UNSIGNED_INT, 0);
 
 			{
 				ImGui::SliderFloat("Object X Translation", &objectTranslation.x, -1.0f, 1.0f);
@@ -283,10 +285,14 @@ int main(void)
 			object.RotateVec3(objectRotation);
 			object.TranslateVec3(objectTranslation);
 
+			//mesh.rotatev(objectRotation);
+			//mesh.translatev(objectTranslation);
+
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 			glfwSwapBuffers(window);
 			glfwPollEvents();
+			boal = true;
 		}
 	}
 

@@ -9,6 +9,7 @@ private:
 	float mouseSensitivity;
 	float FOV;
 public:
+	Config(std::string name);
 	Config(std::string dir, std::string name);
 	~Config();
 	void LoadConfig(std::string dir, std::string name);
