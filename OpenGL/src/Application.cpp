@@ -176,6 +176,8 @@ int main(void)
 		glEnable(GL_DEPTH_TEST);
 
 		Object object = Object(type::blankModel, "", "airplane.obj");
+		Object object1 = Object(type::blankModel, "", "plane.obj");
+
 		//object.GLInit();
 
 
@@ -222,11 +224,12 @@ int main(void)
 
 		glm::vec3 objectTranslation(0.0f, 0.0f, 3.0f);
 		glm::vec3 objectRotation(0.0f, 0.0f, 0.0f);
+		glm::vec3 object1Translation(0.0f, -0.85f, 3.0f);
+		glm::vec3 object1Rotation(0.0f, 0.0f, 0.0f);
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
 
-
-		bool boal = false;
+		
 		while (!glfwWindowShouldClose(window))
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -259,17 +262,32 @@ int main(void)
 			if (currentWidth > 0 && currentHeight > 0) {
 				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
+			///////////////////////////////////////////////////////////////////////////
 			glm::mat4 modelTransformMatrix = object.GetModelTransformMatrix();
 			
 
 
 			glm::mat4 MVP = projectionMatrix * viewMatrix * modelTransformMatrix;
 
-
+			object.Bind();
 
 			object.SetUniformMat4("MVP", MVP);
 
 			glDrawElements(GL_TRIANGLES, object.GetNumIndices(), GL_UNSIGNED_INT, 0);
+			///////////////////////////////////////////////////////////////////////////
+			glm::mat4 modelTransformMatrix1 = object1.GetModelTransformMatrix();
+
+
+
+			glm::mat4 MVP1 = projectionMatrix * viewMatrix * modelTransformMatrix1;
+
+			object1.Bind();
+
+			object1.SetUniformMat4("MVP", MVP1);
+
+			glDrawElements(GL_TRIANGLES, object1.GetNumIndices(), GL_UNSIGNED_INT, 0);
+			///////////////////////////////////////////////////////////////////////////
+
 
 			{
 				ImGui::SliderFloat("Object X Translation", &objectTranslation.x, -1.0f, 1.0f);
@@ -281,9 +299,11 @@ int main(void)
 
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}
-			
+
 			object.RotateVec3(objectRotation);
 			object.TranslateVec3(objectTranslation);
+			object1.RotateVec3(object1Rotation);
+			object1.TranslateVec3(object1Translation);
 
 			//mesh.rotatev(objectRotation);
 			//mesh.translatev(objectTranslation);
@@ -292,7 +312,6 @@ int main(void)
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 			glfwSwapBuffers(window);
 			glfwPollEvents();
-			boal = true;
 		}
 	}
 

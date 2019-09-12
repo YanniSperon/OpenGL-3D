@@ -33,6 +33,10 @@ Object::Object(type type, std::string dir, std::string name)
 	GetShape().cleanUp();
 
 	shader.Bind();
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	shader.Unbind();
 }
 
 Object::~Object()
@@ -72,12 +76,18 @@ Object::~Object()
 //
 void Object::Bind()
 {
-	
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+	shader.Bind();
 }
 
 void Object::Unbind()
 {
-	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	shader.Unbind();
 }
 
 unsigned int Object::GetNumIndices()

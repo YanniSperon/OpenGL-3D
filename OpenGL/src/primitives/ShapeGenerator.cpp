@@ -218,11 +218,11 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 	return ret;
 }
 
-ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string name)
+TexturedShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string name)
 {
-	ShapeData ret;
+	TexturedShapeData ret;
 
-	std::vector<Vertex> positions;
+	std::vector<TexturedVertex> positions;
 	std::vector<GLuint> indices;
 
 	std::string fileName = directory + name;
@@ -285,7 +285,7 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 		{
 			glm::vec3 v;
 			s >> junk >> v.x >> v.y >> v.z;
-			Vertex vert;
+			TexturedVertex vert;
 			vert.position = v;
 			vert.color = glm::vec3(1.0f, 0.0f, 1.0f);
 			positions.push_back(vert);
@@ -303,7 +303,7 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 	}
 
 	ret.numVertices = positionsSize;
-	ret.vertices = new Vertex[positionsSize];
+	ret.vertices = new TexturedVertex[positionsSize];
 	for (unsigned int i = 0; i < positionsSize; i++) {
 		ret.vertices[i] = positions[i];
 	}
