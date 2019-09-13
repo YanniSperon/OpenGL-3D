@@ -40,8 +40,9 @@ void Camera::LookAt(double xpos, double ypos)
 	if (hasControls) {
 		glm::vec2 mouseDelta(xpos - oldMouseX, ypos - oldMouseY);
 
+		// finds the vector perpendicular to both viewDirection and upDirection to find which axis to rotate  the camera around.
 		glm::vec3 toRotateAround = glm::cross(viewDirection, upDirection);
-
+		glm::vec3 vd;
 		viewDirection = glm::mat3(
 			glm::rotate(glm::mat4(1.0f), -mouseDelta.x * mouseSensitivity, upDirection) *
 			glm::rotate(glm::mat4(1.0f), -mouseDelta.y * mouseSensitivity, toRotateAround)

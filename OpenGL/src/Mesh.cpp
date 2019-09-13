@@ -20,7 +20,24 @@ Mesh::Mesh(type type, std::string dir, std::string name)
 		shape = ShapeGenerator::loadShape(dir + name);
 	}
 	else if (type == type::texturedModel) {
-		shape = ShapeGenerator::loadTexturedShape(dir, name);
+		texturedShape = ShapeGenerator::loadTexturedShape(dir, name);
+	}
+	else {
+		shape = ShapeGenerator::makeTriangle();
+	}
+}
+
+Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans)
+	: directory(directory), fileName(fileName), rotation(rot), translation(trans)
+{
+	if (type == type::cubeModel) {
+		shape = ShapeGenerator::makeCube();
+	}
+	else if (type == type::blankModel) {
+		shape = ShapeGenerator::loadShape(dir + name);
+	}
+	else if (type == type::texturedModel) {
+		texturedShape = ShapeGenerator::loadTexturedShape(dir, name);
 	}
 	else {
 		shape = ShapeGenerator::makeTriangle();

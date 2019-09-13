@@ -5,6 +5,7 @@
 
 class Object : public Mesh {
 private:
+	GLuint vertexArrayObjectID;
 	GLuint vertexBufferID;
 	GLuint indexBufferID;
 	GLsizei numIndices;
@@ -12,8 +13,10 @@ private:
 public:
 	Object();
 	Object(type type, std::string dir, std::string name);
+	Object(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans);
 	~Object();
 
+	void Draw(glm::mat4 view, glm::mat4 proj);
 	void Bind();
 	void Unbind();
 	unsigned int GetNumIndices();
