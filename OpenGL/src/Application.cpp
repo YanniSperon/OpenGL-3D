@@ -175,8 +175,8 @@ int main(void)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 
-		Object object = Object(type::blankModel, "", "airplane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-		Object object1 = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+		Object object = Object(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -3.0f), "", "cow.png");
+		Object object1 = Object(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, -3.0f), "", "cow.png");
 
 		ImGui::CreateContext();
 		ImGui_ImplGlfwGL3_Init(window, false);

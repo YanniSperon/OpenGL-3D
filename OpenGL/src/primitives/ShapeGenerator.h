@@ -6,5 +6,5 @@ public:
 	static ShapeData makeTriangle();
 	static ShapeData makeCube();
 	static ShapeData loadShape(std::string fileName);
-	static TexturedShapeData loadTexturedShape(std::string directory, std::string name);
+	static ShapeData loadTexturedShape(std::string directory, std::string name);
 };

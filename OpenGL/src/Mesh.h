@@ -16,11 +16,11 @@ private:
 	glm::vec3 rotation;
 	glm::vec3 translation;
 	ShapeData shape;
-	TexturedShapeData texturedShape;
 public:
 	Mesh();
 	Mesh(type type, std::string dir, std::string name);
 	Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans);
+	Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, const std::string& texDir, const std::string& texName);
 	~Mesh();
 
 	glm::mat4 GetModelTransformMatrix();
