@@ -10,7 +10,8 @@
 #include "Camera.h"
 #include "Config.h"
 #include "Object.h"
-//#include "Mesh.h"
+#include "Player.h"
+#include "PhysicsBody.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -22,7 +23,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-// next vid https://www.youtube.com/watch?v=XA1P4PtXl_Q&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY&index=37
+
 
 Config config = Config("", "config.txt");
 
@@ -37,13 +38,13 @@ static bool dPressed = false;
 static bool spacePressed = false;
 static bool controlPressed = false;
 static bool shiftPressed = false;
+static bool tPressed = false;
 
 static int oldMouseX = 0;
 static int oldMouseY = 0;
 static float movementSpeed = 0.1f;
 
 Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), mouseSensitivity);
-//Mesh mesh = Mesh(type::blankModel, "", "airplane.obj");
 
 static int initialWidth = config.getInitialWidthPreference();
 static int initialHeight = config.getInitialHeightPreference();
@@ -118,6 +119,13 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 		camera.EnableMovementControls();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
+
+	if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+		tPressed = true;
+	}
+	else if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
+		tPressed = false;
+	}
 }
 static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -175,8 +183,11 @@ int main(void)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 
-		Object object = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-		Object object1 = Object(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, -3.0f), "", "cow.png");
+		Object object = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, -3.0f));
+		PhysicsBody object1 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, -3.0f), "", "cow.png");
+		//object1.ApplyForce(glm::vec3(0.0f, -9.807f, 0.0f));
+		//object1.ApplyTorque(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 
 		ImGui::CreateContext();
 		ImGui_ImplGlfwGL3_Init(window, false);
@@ -210,8 +221,12 @@ int main(void)
 			if (controlPressed) {
 				camera.MoveDown();
 			}
+			if (tPressed) {
+				object1.ApplyVelocity(glm::vec3(0.0f, 15.0f, 0.0f));
+				object1.ApplyAngularVelocity(glm::vec3(1.0f, 0.0f, 0.0f));
+				object1.ApplyForce(glm::vec3(0.0f, -4.9f, 0.0f));
+			}
 
-			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			camera.ChangeMovementSpeed(movementSpeed);
 			
@@ -221,10 +236,10 @@ int main(void)
 				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
 			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
 			object.Draw(viewMatrix, projectionMatrix);
 			///////////////////////////////////////////////////////////////////////////
 			object1.Draw(viewMatrix, projectionMatrix);
+			object1.Update(ImGui::GetIO().DeltaTime);
 			///////////////////////////////////////////////////////////////////////////
 
 

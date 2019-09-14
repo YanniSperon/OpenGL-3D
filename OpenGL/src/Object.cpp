@@ -14,6 +14,7 @@ Object::Object(type type, std::string dir, std::string name)
 {
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
+	stbi_set_flip_vertically_on_load(1);
 
 
 	int width, height, nrChannels;
@@ -72,6 +73,7 @@ Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm:
 {
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
+	stbi_set_flip_vertically_on_load(1); 
 
 
 	int width, height, nrChannels;
@@ -130,6 +132,7 @@ Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm:
 {
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
+	stbi_set_flip_vertically_on_load(1);
 
 
 	int width, height, nrChannels;

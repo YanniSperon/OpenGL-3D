@@ -82,6 +82,13 @@ void Mesh::RotateVec3(glm::vec3 rot) {
 	rotation = rot;
 }
 
+void Mesh::RotateAdd3f(float x, float y, float z)
+{
+	rotation.x += x;
+	rotation.y += y;
+	rotation.z += z;
+}
+
 void Mesh::Translate3f(float x, float y, float z)
 {
 	translation.x = x;
@@ -91,6 +98,23 @@ void Mesh::Translate3f(float x, float y, float z)
 
 void Mesh::TranslateVec3(glm::vec3 trans) {
 	translation = trans;
+}
+
+void Mesh::TranslateAdd3f(float x, float y, float z)
+{
+	translation.x += x;
+	translation.y += y;
+	translation.z += z;
+}
+
+glm::vec3 Mesh::GetTranslation()
+{
+	return translation;
+}
+
+glm::vec3 Mesh::GetRotation()
+{
+	return rotation;
 }
 
 ShapeData Mesh::GetShape()

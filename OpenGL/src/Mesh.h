@@ -26,8 +26,12 @@ public:
 	glm::mat4 GetModelTransformMatrix();
 	void Rotate3f(float x, float y, float z);
 	void RotateVec3(glm::vec3 rot);
+	void RotateAdd3f(float x, float y, float z);
 	void Translate3f(float x, float y, float z);
 	void TranslateVec3(glm::vec3 trans);
+	void TranslateAdd3f(float x, float y, float z);
+	glm::vec3 GetTranslation();
+	glm::vec3 GetRotation();
 	ShapeData GetShape();
 	void SetShape(ShapeData newShape);
 };
