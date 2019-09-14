@@ -129,7 +129,19 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 }
 static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	camera.LookAt(xpos, ypos);
+	if (ypos * mouseSensitivity > 1.5708) {
+		double newMouseY = 1.57 / mouseSensitivity;
+		glfwSetCursorPos(window, xpos, newMouseY);
+		camera.LookAt(xpos, newMouseY);
+	}
+	else if (ypos * mouseSensitivity < -1.5708) {
+		double newMouseY = -1.57 / mouseSensitivity;
+		glfwSetCursorPos(window, xpos, newMouseY);
+		camera.LookAt(xpos, newMouseY);
+	}
+	else {
+		camera.LookAt(xpos, ypos);
+	}
 }
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -239,7 +251,7 @@ int main(void)
 			object.Draw(viewMatrix, projectionMatrix);
 			///////////////////////////////////////////////////////////////////////////
 			object1.Draw(viewMatrix, projectionMatrix);
-			object1.Update(ImGui::GetIO().DeltaTime);
+			object1.Update(1.0f/144.0f);
 			///////////////////////////////////////////////////////////////////////////
 
 
