@@ -27,9 +27,11 @@ public:
 	void Rotate3f(float x, float y, float z);
 	void RotateVec3(glm::vec3 rot);
 	void RotateAdd3f(float x, float y, float z);
+	void RotateAddVec3(glm::vec3 rot);
 	void Translate3f(float x, float y, float z);
 	void TranslateVec3(glm::vec3 trans);
 	void TranslateAdd3f(float x, float y, float z);
+	void TranslateAddVec3(glm::vec3 trans);
 	glm::vec3 GetTranslation();
 	glm::vec3 GetRotation();
 	ShapeData GetShape();

@@ -89,6 +89,11 @@ void Mesh::RotateAdd3f(float x, float y, float z)
 	rotation.z += z;
 }
 
+void Mesh::RotateAddVec3(glm::vec3 rot)
+{
+	rotation += rot;
+}
+
 void Mesh::Translate3f(float x, float y, float z)
 {
 	translation.x = x;
@@ -105,6 +110,11 @@ void Mesh::TranslateAdd3f(float x, float y, float z)
 	translation.x += x;
 	translation.y += y;
 	translation.z += z;
+}
+
+void Mesh::TranslateAddVec3(glm::vec3 trans)
+{
+	translation += trans;
 }
 
 glm::vec3 Mesh::GetTranslation()

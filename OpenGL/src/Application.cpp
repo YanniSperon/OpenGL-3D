@@ -12,6 +12,9 @@
 #include "Object.h"
 #include "Player.h"
 #include "PhysicsBody.h"
+#include "BoundingSphere.h"
+#include "AxisAlignedBoundingBox.h"
+#include "Plane.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -23,7 +26,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-
+// https://www.youtube.com/watch?v=fUO9tk6IarY&list=PLEETnX-uPtBXm1KEr_2zQ6K_0hoGH6JJ0&index=7 - 00:31
 
 Config config = Config("", "config.txt");
 
@@ -196,10 +199,31 @@ int main(void)
 		glEnable(GL_DEPTH_TEST);
 
 		Object object = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, -3.0f));
-		PhysicsBody object1 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, -3.0f), "", "cow.png");
-		//object1.ApplyForce(glm::vec3(0.0f, -9.807f, 0.0f));
-		//object1.ApplyTorque(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		PhysicsBody object1 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), "", "cow.png",
+			1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 
+			1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
 
+
+		{
+			BoundingSphere sphere1(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
+			BoundingSphere sphere2(glm::vec3(0.0f, 3.0f, 0.0f), 1.0f);
+			BoundingSphere sphere3(glm::vec3(0.0f, 0.0f, 2.0f), 1.0f);
+			BoundingSphere sphere4(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+
+
+			Plane plane1(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+
+			IntersectData plane1IntersectSphere1 = plane1.IntersectSphere(sphere1);
+			IntersectData plane1IntersectSphere2 = plane1.IntersectSphere(sphere2);
+			IntersectData plane1IntersectSphere3 = plane1.IntersectSphere(sphere3);
+			IntersectData plane1IntersectSphere4 = plane1.IntersectSphere(sphere4);
+
+
+			std::cout << "Plane1 intersect sphere1: " << plane1IntersectSphere1.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere1.GetDistance() << "\n";
+			std::cout << "Plane1 intersect sphere2: " << plane1IntersectSphere2.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere2.GetDistance() << "\n";
+			std::cout << "Plane1 intersect sphere3: " << plane1IntersectSphere3.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere3.GetDistance() << "\n";
+			std::cout << "Plane1 intersect sphere4: " << plane1IntersectSphere4.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere4.GetDistance() << "\n";
+		}
 
 		ImGui::CreateContext();
 		ImGui_ImplGlfwGL3_Init(window, false);
@@ -208,6 +232,8 @@ int main(void)
 		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
 
+		float timeConstant = 1.0f;
+		float currentTime = 0.0f;
 		
 		while (!glfwWindowShouldClose(window))
 		{
@@ -234,9 +260,16 @@ int main(void)
 				camera.MoveDown();
 			}
 			if (tPressed) {
-				object1.ApplyVelocity(glm::vec3(0.0f, 15.0f, 0.0f));
-				object1.ApplyAngularVelocity(glm::vec3(1.0f, 0.0f, 0.0f));
-				object1.ApplyForce(glm::vec3(0.0f, -4.9f, 0.0f));
+				std::cout << "\n\nAcceleration: \n";
+				std::cout << "x: " << object1.GetLinearAcceleration().x << "\n";
+				std::cout << "y: " << object1.GetLinearAcceleration().y << "\n";
+				std::cout << "z: " << object1.GetLinearAcceleration().z << "\n";
+				std::cout << "Velocity: \n";
+				std::cout << "x: " << object1.GetLinearVelocity().x << "\n";
+				std::cout << "y: " << object1.GetLinearVelocity().y << "\n";
+				std::cout << "z: " << object1.GetLinearVelocity().z << "\n";
+				std::cout << "Time:  " << currentTime << "\n\n\n";
+				object1.Stop();
 			}
 
 			///////////////////////////////////////////////////////////////////////////
@@ -251,7 +284,9 @@ int main(void)
 			object.Draw(viewMatrix, projectionMatrix);
 			///////////////////////////////////////////////////////////////////////////
 			object1.Draw(viewMatrix, projectionMatrix);
-			object1.Update(1.0f/144.0f);
+			float timeAddition = (1.0f / 144.0f) * timeConstant;
+			currentTime += timeAddition;
+			object1.Update(timeAddition);
 			///////////////////////////////////////////////////////////////////////////
 
 
