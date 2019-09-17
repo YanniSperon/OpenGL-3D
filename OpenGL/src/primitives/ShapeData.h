@@ -29,3 +29,10 @@ struct ShapeData
 		numVertices = numIndices = numTexCoords = 0;
 	}
 };
+
+struct TexCoord {
+	TexCoord() :
+		u(0.0f), v(0.0f) {}
+	float u;
+	float v;
+};

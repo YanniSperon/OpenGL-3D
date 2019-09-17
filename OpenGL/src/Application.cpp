@@ -199,9 +199,13 @@ int main(void)
 		glEnable(GL_DEPTH_TEST);
 
 		Object object = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, -3.0f));
-		PhysicsBody object1 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), "", "cow.png",
+		PhysicsBody object1 = PhysicsBody(type::texturedModel, "", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), "", "4knew.png",
 			1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 
 			1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
+
+		PhysicsBody object2 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 10.0f, 0.0f), "", "cow.png",
+			1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+			1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 		{
@@ -288,6 +292,7 @@ int main(void)
 			currentTime += timeAddition;
 			object1.Update(timeAddition);
 			///////////////////////////////////////////////////////////////////////////
+			object2.Draw(viewMatrix, projectionMatrix);
 
 
 			{

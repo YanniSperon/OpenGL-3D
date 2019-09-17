@@ -16,6 +16,8 @@ private:
 	glm::vec3 rotation;
 	glm::vec3 translation;
 	ShapeData shape;
+	glm::vec3 minExtents;
+	glm::vec3 maxExtents;
 public:
 	Mesh();
 	Mesh(type type, std::string dir, std::string name);

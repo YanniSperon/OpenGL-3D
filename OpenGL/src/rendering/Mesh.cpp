@@ -5,42 +5,42 @@
 #include <iostream>
 
 Mesh::Mesh()
-	: directory(""), fileName("Error"), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), shape()
+	: directory(""), fileName("Error"), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), shape(), minExtents(0.0f, 0.0f, 0.0f), maxExtents(0.0f, 0.0f, 0.0f)
 {
 
 }
 
 Mesh::Mesh(type type, std::string dir, std::string name)
-	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f)
+	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), minExtents(0.0f, 0.0f, 0.0f), maxExtents(0.0f, 0.0f, 0.0f)
 {
 	if (type == type::cubeModel) {
-		shape = ShapeGenerator::makeCube();
+		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
 	}
 	else if (type == type::blankModel) {
-		shape = ShapeGenerator::loadShape(dir + name);
+		shape = ShapeGenerator::loadShape(dir + name, minExtents, maxExtents);
 	}
 	else if (type == type::texturedModel) {
-		shape = ShapeGenerator::loadTexturedShape(dir, name);
+		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
 	}
 	else {
-		shape = ShapeGenerator::makeTriangle();
+		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);
 	}
 }
 
 Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans)
-	: directory(directory), fileName(fileName), rotation(rot), translation(trans)
+	: directory(directory), fileName(fileName), rotation(rot), translation(trans), minExtents(0.0f, 0.0f, 0.0f), maxExtents(0.0f, 0.0f, 0.0f)
 {
 	if (type == type::cubeModel) {
-		shape = ShapeGenerator::makeCube();
+		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
 	}
 	else if (type == type::blankModel) {
-		shape = ShapeGenerator::loadShape(dir + name);
+		shape = ShapeGenerator::loadShape(dir + name, minExtents, maxExtents);
 	}
 	else if (type == type::texturedModel) {
-		shape = ShapeGenerator::loadTexturedShape(dir, name);
+		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
 	}
 	else {
-		shape = ShapeGenerator::makeTriangle();
+		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);
 	}
 }
 
@@ -48,16 +48,16 @@ Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec
 	: directory(directory), fileName(fileName), rotation(rot), translation(trans)
 {
 	if (type == type::cubeModel) {
-		shape = ShapeGenerator::makeCube();
+		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
 	}
 	else if (type == type::blankModel) {
-		shape = ShapeGenerator::loadShape(dir + name);
+		shape = ShapeGenerator::loadShape(dir + name, minExtents, maxExtents);
 	}
 	else if (type == type::texturedModel) {
-		shape = ShapeGenerator::loadTexturedShape(dir, name);
+		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
 	}
 	else {
-		shape = ShapeGenerator::makeTriangle();
+		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);
 	}
 }
 

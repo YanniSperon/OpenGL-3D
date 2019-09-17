@@ -3,8 +3,8 @@
 #include <string>
 class ShapeGenerator {
 public:
-	static ShapeData makeTriangle();
-	static ShapeData makeCube();
-	static ShapeData loadShape(std::string fileName);
-	static ShapeData loadTexturedShape(std::string directory, std::string name);
+	static ShapeData makeTriangle(glm::vec3& min, glm::vec3& max);
+	static ShapeData makeCube(glm::vec3& min, glm::vec3& max);
+	static ShapeData loadShape(std::string fileName, glm::vec3& min, glm::vec3& max);
+	static ShapeData loadTexturedShape(std::string directory, std::string name, glm::vec3& min, glm::vec3& max);
 };

@@ -9,19 +9,40 @@
 
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a);
 
-ShapeData ShapeGenerator::makeTriangle() {
+ShapeData ShapeGenerator::makeTriangle(glm::vec3& min, glm::vec3& max) {
+	float minX = -INFINITY;
+	float minY = -INFINITY;
+	float minZ = -INFINITY;
+
+	float maxX = -INFINITY;
+	float maxY = -INFINITY;
+	float maxZ = -INFINITY;
+
 	ShapeData ret;
 
 	Vertex positions[] = {
 		glm::vec3(-1.0f, -1.0f, +0.0f),     // 0
 		glm::vec3(+0.0f, +1.0f, +0.0f),
+		glm::vec2(+0.0f, +0.0f),
 
 		glm::vec3(+1.0f, -1.0f, +0.0f),      // 1
 		glm::vec3(+0.0f, +0.0f, +1.0f),
+		glm::vec2(+0.0f, +0.0f),
 
 		glm::vec3(+0.0f, +1.0f, +0.0f),      // 2
 		glm::vec3(+1.0f, +0.0f, +0.0f),
+		glm::vec2(+0.0f, +0.0f),
 	};
+	minX = -1.0f;
+	minY = -1.0f;
+	minZ = +0.0f;
+
+	min = glm::vec3(minX, minY, minZ);
+	max = glm::vec3(maxX, maxY, maxZ);
+
+	maxX = +1.0f;
+	maxY = +1.0f;
+	maxZ = +0.0f;
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(positions);
 	ret.vertices = new Vertex[ret.numVertices];
@@ -37,8 +58,16 @@ ShapeData ShapeGenerator::makeTriangle() {
 	return ret;
 }
 
-ShapeData ShapeGenerator::makeCube()
+ShapeData ShapeGenerator::makeCube(glm::vec3& min, glm::vec3& max)
 {
+	float minX = -INFINITY;
+	float minY = -INFINITY;
+	float minZ = -INFINITY;
+
+	float maxX = -INFINITY;
+	float maxY = -INFINITY;
+	float maxZ = -INFINITY;
+	
 	ShapeData ret;
 
 	Vertex positions[] = {
@@ -179,7 +208,7 @@ ShapeData ShapeGenerator::makeCube()
 	return ret;
 }
 
-ShapeData ShapeGenerator::loadShape(std::string fileName)
+ShapeData ShapeGenerator::loadShape(std::string fileName, glm::vec3& min, glm::vec3& max)
 {
 	ShapeData ret;
 
@@ -242,12 +271,13 @@ ShapeData ShapeGenerator::loadShape(std::string fileName)
 	return ret;
 }
 
-ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string name)
+ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string name, glm::vec3& min, glm::vec3& max)
 {
 	ShapeData ret;
 
 	std::vector<Vertex> positions;
 	std::vector<GLuint> indices;
+	std::vector<TexCoord> tempTex;
 
 	std::string fileName = directory + name;
 
@@ -273,9 +303,10 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 		std::string str(line);
 
 		char junk;
+		char slash = '/';
 
 		// Load materials from mtl file
-		if (str.find("mtllib") != std::string::npos)
+		/*if (str.find("mtllib") != std::string::npos)
 		{
 			mtlName = str.substr(str.find("mtllib") + 7);
 			std::cout << mtlName << std::endl;
@@ -302,10 +333,10 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 				char junk;
 				std::cout << "Loaded mtl file and grabbed line: " << lineMTL << "\n";
 			}
-		}
+		}*/
 		// finished loading materials from mtl, now scan obj file for information referencing that file.
 		//else if (str.find())
-		else if (line[0] == 'v')
+		/*else*/ if (line[0] == 'v' && line[1] == ' ')
 		{
 			glm::vec3 v;
 			s >> junk >> v.x >> v.y >> v.z;
@@ -315,14 +346,31 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 			positions.push_back(vert);
 			positionsSize += 1;
 		}
-		else if (line[0] == 'f')
+		else if (line[0] == 'f' && line[1] == ' ')
 		{
 			unsigned int f[3];
-			s >> junk >> f[0] >> f[1] >> f[2];
+			unsigned int uv[3];
+			
+			s >> junk >> f[0] >> slash >> uv[0] >>  f[1] >> slash >> uv[1] >> f[2] >> slash >> uv[2];
 			indices.push_back(f[0] - 1);
 			indices.push_back(f[1] - 1);
 			indices.push_back(f[2] - 1);
 			indicesSize += 3;
+			positions[f[0] - 1].texCoord = glm::vec2(tempTex[uv[0] - 1].u, tempTex[uv[0] - 1].v);
+			positions[f[1] - 1].texCoord = glm::vec2(tempTex[uv[1] - 1].u, tempTex[uv[1] - 1].v);
+			positions[f[2] - 1].texCoord = glm::vec2(tempTex[uv[2] - 1].u, tempTex[uv[2] - 1].v);
+		}
+		else if (line[0] == 'v' && line[1] == 't') {
+			float one;
+			float two;
+			std::string name;
+			s >> name;
+			s >> one;
+			s >> two;
+			TexCoord uv;
+			uv.u = one;
+			uv.v = two;
+			tempTex.push_back(uv);
 		}
 	}
 
