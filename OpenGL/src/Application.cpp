@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <irrKlang.h>
+#include <openvr.h>
 
 #include <iostream>
 #include <fstream>
@@ -10,11 +12,14 @@
 #include "Camera.h"
 #include "Config.h"
 #include "Object.h"
-#include "Player.h"
 #include "PhysicsBody.h"
 #include "BoundingSphere.h"
 #include "AxisAlignedBoundingBox.h"
 #include "Plane.h"
+#include "AABBCollidable.h"
+#include "Loader.h"
+#include "Timer.h"
+#include "Simple2DRenderer.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -26,9 +31,12 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-// https://www.youtube.com/watch?v=fUO9tk6IarY&list=PLEETnX-uPtBXm1KEr_2zQ6K_0hoGH6JJ0&index=7 - 00:31
+Config config = Config("res/other/", "config.txt");
 
-Config config = Config("", "config.txt");
+extern "C"
+{
+	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
 
 static bool fullscreen = config.getFullscreenPreference();
 static float mouseSensitivity = config.getMouseSensitivityPreference();
@@ -52,8 +60,12 @@ Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::v
 static int initialWidth = config.getInitialWidthPreference();
 static int initialHeight = config.getInitialHeightPreference();
 
+static bool hasVR = config.getVRPreference();
+
 static int currentWidth = initialWidth;
 static int currentHeight = initialHeight;
+
+static int VSyncPreference = config.getVSyncPreference();
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -178,14 +190,28 @@ int main(void)
 
 	glfwMakeContextCurrent(window);
 
-	glfwSwapInterval(1);
+	glfwSwapInterval(VSyncPreference); // change to 1 to disable vsync
 
 	if (glewInit() != GLEW_OK) {
-		std::cout << "Error!" << std::endl;
+		printf("Error!\n");
 	}
 
-	std::cout << glGetString(GL_VERSION) << std::endl;
+	irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+	vr::IVRSystem* vr_pointer = NULL;
 
+	if (hasVR) {
+		vr::EVRInitError eError = vr::VRInitError_None;
+		vr_pointer = VR_Init(&eError, vr::VRApplication_Scene); // VRApplication_Background OR VRApplication_Scene OR VRApplication_Overlay OR VRApplication_Utility
+		if (eError != vr::VRInitError_None)
+		{
+			hasVR = false;
+			vr_pointer = NULL;
+			printf("Unable to init VR runtime: %s \n",
+				VR_GetVRInitErrorAsEnglishDescription(eError));
+		}
+	}
+	
+	printf("Vendor: %s\nModel: %s\nVersion: %s\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		if (glfwRawMouseMotionSupported())
@@ -193,57 +219,86 @@ int main(void)
 		glfwSetCursorPosCallback(window, cursorPositionCallback);
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
+		/////////////////////////////////////////////////////////////////////////////////////////////////////
+		//const char* attackSFXFilename = "res/audio/sfx/attack.wav";
+		//const char* explosionSFXFilename = "res/audio/sfx/explosion.wav";
+		//const char* jumpSFXFilename = "res/audio/sfx/jump.wav";
+		//const char* pickupSFXFilename = "res/audio/sfx/pickup.wav";
+		//const char* selectSFXFilename = "res/audio/sfx/select.wav";
+		//const char* shootSFXFilename = "res/audio/sfx/shoot.wav";
+		//const char* steamSFXFilename = "res/audio/sfx/steam.wav";
+		/////////////////////////////////////////////////////////////////////////////////////////////////////
+		//engine->setSoundVolume(0);
+		//irrklang::ISound* attackSFX = engine->play2D(attackSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* explosionSFX = engine->play2D(explosionSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* jumpSFX = engine->play2D(jumpSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* pickupSFX = engine->play2D(pickupSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* selectSFX = engine->play2D(selectSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* shootSFX = engine->play2D(shootSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//irrklang::ISound* steamSFX = engine->play2D(steamSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		//engine->play2D(steamSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		/////////////////////////////////////////////////////////////////////////////////////////////////////
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendEquation(GL_ADD);
 		glEnable(GL_DEPTH_TEST);
 
-		Object object = Object(type::blankModel, "", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, -3.0f));
-		PhysicsBody object1 = PhysicsBody(type::texturedModel, "", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), "", "4knew.png",
-			1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 
-			1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
+		Simple2DRenderer renderer;
 
-		PhysicsBody object2 = PhysicsBody(type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 10.0f, 0.0f), "", "cow.png",
-			1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-			1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
-
-
-		{
-			BoundingSphere sphere1(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
-			BoundingSphere sphere2(glm::vec3(0.0f, 3.0f, 0.0f), 1.0f);
-			BoundingSphere sphere3(glm::vec3(0.0f, 0.0f, 2.0f), 1.0f);
-			BoundingSphere sphere4(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
-
-
-			Plane plane1(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
-
-			IntersectData plane1IntersectSphere1 = plane1.IntersectSphere(sphere1);
-			IntersectData plane1IntersectSphere2 = plane1.IntersectSphere(sphere2);
-			IntersectData plane1IntersectSphere3 = plane1.IntersectSphere(sphere3);
-			IntersectData plane1IntersectSphere4 = plane1.IntersectSphere(sphere4);
-
-
-			std::cout << "Plane1 intersect sphere1: " << plane1IntersectSphere1.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere1.GetDistance() << "\n";
-			std::cout << "Plane1 intersect sphere2: " << plane1IntersectSphere2.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere2.GetDistance() << "\n";
-			std::cout << "Plane1 intersect sphere3: " << plane1IntersectSphere3.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere3.GetDistance() << "\n";
-			std::cout << "Plane1 intersect sphere4: " << plane1IntersectSphere4.GetDoesIntersect() << "\nDistance: " << plane1IntersectSphere4.GetDistance() << "\n";
+		GLuint sphereCowTex = Loader::LoadTexture("res/textures/", "newcow.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		GLuint radaTex = Loader::LoadTexture("res/textures/", "rada.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		GLuint radaradaTex = Loader::LoadTexture("res/textures/", "radarada.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		GLuint new4kTex = Loader::LoadTexture("res/textures/", "4krgba.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		GLuint blankTex = Loader::LoadTexture("res/textures/", "blank.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		GLuint skyboxTex = Loader::LoadTexture("res/textures/", "skybox.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+		
+		Object object = Object(glm::vec3(-5.0f, -5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), type::blankModel, "res/models/", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, 0.0f), blankTex);
+		Object skybox = Object(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec3(50.0f, 50.0f, 50.0f), type::skyBox, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), skyboxTex, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		PhysicsBody object1 = PhysicsBody(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), type::texturedModel, "res/models/", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), new4kTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
+		AABBCollidable object2 = AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+		std::vector<AABBCollidable> objects;
+		for (unsigned int i = 0; i < 50; i++) {
+			int val = (float)((rand() / (float)RAND_MAX * 3));
+			if (val == 0) {
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+			} else if (val == 1) {
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), radaTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+			} else if (val == 2) {
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), radaradaTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+			}
 		}
+		AABBCollidable object3 = AABBCollidable(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+
+		GLuint leftEyeFrameBuffer;
+		glGenFramebuffers(1, &leftEyeFrameBuffer);
+		GLuint rightEyeFrameBuffer;
+		glGenFramebuffers(1, &rightEyeFrameBuffer);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		ImGui::CreateContext();
 		ImGui_ImplGlfwGL3_Init(window, false);
 		ImGui::StyleColorsDark();
 
-		glm::vec3 cameraTranslation(0.0f, 0.0f, 0.0f);
+		glm::vec3 camPos(0.0f, 0.0f, 0.0f);
 		glfwSetCursorPos(window, 0.0, 0.0);
 
 		float timeConstant = 1.0f;
-		float currentTime = 0.0f;
+		double lastTime = glfwGetTime();
+		double deltaT = 0, nowTime = 0;
 		
 		while (!glfwWindowShouldClose(window))
 		{
+			nowTime = glfwGetTime();
+			deltaT = (nowTime - lastTime);
+			lastTime = nowTime;
+
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 			ImGui_ImplGlfwGL3_NewFrame();
 
+			float deltaTime = (float)deltaT * timeConstant;
 
 			if (wPressed) {
 				camera.MoveForward();
@@ -264,46 +319,75 @@ int main(void)
 				camera.MoveDown();
 			}
 			if (tPressed) {
-				std::cout << "\n\nAcceleration: \n";
-				std::cout << "x: " << object1.GetLinearAcceleration().x << "\n";
-				std::cout << "y: " << object1.GetLinearAcceleration().y << "\n";
-				std::cout << "z: " << object1.GetLinearAcceleration().z << "\n";
-				std::cout << "Velocity: \n";
-				std::cout << "x: " << object1.GetLinearVelocity().x << "\n";
-				std::cout << "y: " << object1.GetLinearVelocity().y << "\n";
-				std::cout << "z: " << object1.GetLinearVelocity().z << "\n";
-				std::cout << "Time:  " << currentTime << "\n\n\n";
+				printf("Linear Acceleration:(%f, %f, %f)\nLinear Velocity: (%f, %f, %f)\n", object1.GetLinearAcceleration().x, object1.GetLinearAcceleration().y, object1.GetLinearAcceleration().z, object1.GetLinearVelocity().x, object1.GetLinearVelocity().y, object1.GetLinearVelocity().z);
 				object1.Stop();
 			}
 
 			///////////////////////////////////////////////////////////////////////////
 			camera.ChangeMovementSpeed(movementSpeed);
-			
+			camera.BringWith(skybox);
+			camPos = camera.GetTranslation();
+
 			glm::mat4 viewMatrix = camera.GetViewTransformMatrix();
 			glm::mat4 projectionMatrix;
 			if (currentWidth > 0 && currentHeight > 0) {
 				projectionMatrix = glm::perspective(glm::radians(FOV), (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
 			}
 			///////////////////////////////////////////////////////////////////////////
-			object.Draw(viewMatrix, projectionMatrix);
+			object1.Update(deltaTime);
 			///////////////////////////////////////////////////////////////////////////
-			object1.Draw(viewMatrix, projectionMatrix);
-			float timeAddition = (1.0f / 144.0f) * timeConstant;
-			currentTime += timeAddition;
-			object1.Update(timeAddition);
+			object2.Update(deltaTime);
 			///////////////////////////////////////////////////////////////////////////
-			object2.Draw(viewMatrix, projectionMatrix);
+			object3.Update(deltaTime);
+			///////////////////////////////////////////////////////////////////////////
+			renderer.submitForceRender(&skybox);
+			renderer.submit(&object, camPos);
+			renderer.submit(&object1, camPos);
+			renderer.submit(&object2, camPos);
+			renderer.submit(&object3, camPos);
+			for (unsigned int i = 0; i < objects.size(); i++) {
+				renderer.submit(&objects[i], camPos);
+			}
+			if (hasVR) {
+				vr::TrackedDevicePose_t trackedDevicePose;
+				vr_pointer->GetDeviceToAbsoluteTrackingPose(
+					vr::TrackingUniverseStanding, 0, &trackedDevicePose, 1);
+				vr::VRCompositor()->WaitGetPoses(&trackedDevicePose, vr::k_unMaxTrackedDeviceCount, NULL, 0);
 
+				glBlitNamedFramebuffer(0, leftEyeFrameBuffer, 0, 0, currentWidth, currentHeight, 0, 0, currentWidth, currentHeight	, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				const vr::Texture_t tex = { reinterpret_cast<void*>(intptr_t(leftEyeFrameBuffer)), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+				vr::EVRCompositorError value = vr::VRCompositor()->Submit(vr::Eye_Left, &tex);
+				if (value != vr::VRCompositorError_None)
+				{
+					printf("VRCompositorError: %i \n", value);
+					//vr::VRCompositorError_DoNotHaveFocus;
+					//vr::VRCompositorError
+				}
+			}
+
+			renderer.flush(viewMatrix, projectionMatrix);
 
 			{
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+/*
+				ImGui::SliderFloat("xPos", &object3Trans.x, -10.0f, 10.0f);
+				ImGui::SliderFloat("yPos", &object3Trans.y, -10.0f, 10.0f);
+				ImGui::SliderFloat("zPos", &object3Trans.z, -10.0f, 10.0f);*/
 			}
+
+			//object3.TranslateVec3(object3Trans);
 
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
+	}
+
+	if (vr_pointer != NULL)
+	{
+		vr::VR_Shutdown();
+		vr_pointer = NULL;
 	}
 
 	ImGui_ImplGlfwGL3_Shutdown();

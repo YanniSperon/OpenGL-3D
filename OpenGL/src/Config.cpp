@@ -22,11 +22,13 @@ Config::~Config()
 void Config::LoadConfig(std::string dir, std::string name)
 {
 	fullscreen = false;
+	vr = false;
 	initialWidth = 1280;
 	initialHeight = 720;
 	mouseSensitivity = 0.01f;
 	FOV = 60.0f;
-
+	vsync = 1;
+	
 	std::ifstream f(dir + name);
 
 	if (!f.is_open()) {
@@ -47,6 +49,15 @@ void Config::LoadConfig(std::string dir, std::string name)
 				fullscreen = false;
 			}
 		}
+		else if (line.find("vr=") != std::string::npos) {
+			std::string value = line.substr(3);
+			if (value == "true") {
+				vr = true;
+			}
+			else {
+				vr = false;
+			}
+		}
 		else if (line.find("initialWidth=") != std::string::npos) {
 			std::string value = line.substr(13);
 			initialWidth = std::stoi(value);
@@ -63,12 +74,21 @@ void Config::LoadConfig(std::string dir, std::string name)
 			std::string value = line.substr(4);
 			FOV = std::stof(value);
 		}
+		else if (line.find("vsync=") != std::string::npos) {
+			std::string value = line.substr(6);
+			vsync = std::stoi(value);
+		}
 	}
 }
 
 bool Config::getFullscreenPreference()
 {
 	return fullscreen;
+}
+
+bool Config::getVRPreference()
+{
+	return vr;
 }
 
 int Config::getInitialWidthPreference()
@@ -89,4 +109,9 @@ float Config::getMouseSensitivityPreference()
 float Config::getFOVPreference()
 {
 	return FOV;
+}
+
+int Config::getVSyncPreference()
+{
+	return vsync;
 }

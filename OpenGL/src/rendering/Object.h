@@ -12,9 +12,9 @@ private:
 	Shader shader;
 public:
 	Object();
-	Object(type type, std::string dir, std::string name);
-	Object(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans);
-	Object(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, const std::string& texDir, const std::string& texName);
+	Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, GLuint tex);
+	Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, GLuint tex);
+	Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, GLuint tex, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords);
 	~Object();
 
 	void Draw(glm::mat4 view, glm::mat4 proj);

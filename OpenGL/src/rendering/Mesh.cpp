@@ -10,8 +10,8 @@ Mesh::Mesh()
 
 }
 
-Mesh::Mesh(type type, std::string dir, std::string name)
-	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), minExtents(0.0f, 0.0f, 0.0f), maxExtents(0.0f, 0.0f, 0.0f)
+Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name)
+	: directory(directory), fileName(fileName), rotation(0.0f, 0.0f, 0.0f), translation(0.0f, 0.0f, 0.0f), minExtents(min), maxExtents(max)
 {
 	if (type == type::cubeModel) {
 		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
@@ -27,8 +27,8 @@ Mesh::Mesh(type type, std::string dir, std::string name)
 	}
 }
 
-Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans)
-	: directory(directory), fileName(fileName), rotation(rot), translation(trans), minExtents(0.0f, 0.0f, 0.0f), maxExtents(0.0f, 0.0f, 0.0f)
+Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans)
+	: directory(directory), fileName(fileName), rotation(rot), translation(trans), minExtents(min), maxExtents(max)
 {
 	if (type == type::cubeModel) {
 		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
@@ -44,20 +44,13 @@ Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec
 	}
 }
 
-Mesh::Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, const std::string& texDir, const std::string& texName)
-	: directory(directory), fileName(fileName), rotation(rot), translation(trans)
+Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords)
 {
-	if (type == type::cubeModel) {
-		shape = ShapeGenerator::makeCube(minExtents, maxExtents);
-	}
-	else if (type == type::blankModel) {
-		shape = ShapeGenerator::loadShape(dir + name, minExtents, maxExtents);
-	}
-	else if (type == type::texturedModel) {
-		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
+	if (type == type::skyBox) {
+		shape = ShapeGenerator::makeSkybox(minExtents, maxExtents, topTexCoords, bottomTexCoords, leftTexCoords, rightTexCoords, frontTexCoords, backTexCoords);
 	}
 	else {
-		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);
+		printf("Error: Using skybox constructor without skybox\n");
 	}
 }
 

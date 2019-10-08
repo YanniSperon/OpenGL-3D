@@ -7,38 +7,13 @@
 Object::Object()
 	: Mesh(), vertexBufferID(0), indexBufferID(0), numIndices(0), texID(0)
 {
+
 }
 
-Object::Object(type type, std::string dir, std::string name)
-	: Mesh(type, dir, name), shader("res/shaders/Basic.shader"), texID(0)
+Object::Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, GLuint tex)
+	: Mesh(minCorner, maxCorner, type, dir, name), shader("res/shaders/Basic.shader"), texID(0)
 {
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-	stbi_set_flip_vertically_on_load(1);
-
-
-	int width, height, nrChannels;
-	std::string str = "blank.png";
-	const char* c = str.c_str();
-	unsigned char* data = stbi_load(c, &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
+	texID = tex;
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
@@ -68,36 +43,10 @@ Object::Object(type type, std::string dir, std::string name)
 	shader.Unbind();
 }
 
-Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans)
-	: Mesh(type, dir, name, rot, trans), shader("res/shaders/Basic.shader"), texID(0)
+Object::Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, GLuint tex)
+	: Mesh(minCorner, maxCorner, type, dir, name, rot, trans), shader("res/shaders/Basic.shader"), texID(0)
 {
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-	stbi_set_flip_vertically_on_load(1); 
-
-
-	int width, height, nrChannels;
-	std::string str = "blank.png";
-	const char* c = str.c_str();
-	unsigned char* data = stbi_load(c, &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
+	texID = tex;
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
@@ -127,36 +76,10 @@ Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm:
 	shader.Unbind();
 }
 
-Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, const std::string& texDir, const std::string& texName)
-	: Mesh(type, dir, name, rot, trans), shader("res/shaders/Basic.shader")
+Object::Object(glm::vec3 minCorner, glm::vec3 maxCorner, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, GLuint tex, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords)
+	: Mesh(minCorner, maxCorner, type, dir, name, rot, trans, topTexCoords, bottomTexCoords, leftTexCoords, rightTexCoords, frontTexCoords, backTexCoords), shader("res/shaders/Basic.shader"), texID(0)
 {
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-	stbi_set_flip_vertically_on_load(1);
-
-
-	int width, height, nrChannels;
-	std::string str = texDir + texName;
-	const char* c = str.c_str();
-	unsigned char* data = stbi_load(c, &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
+	texID = tex;
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
@@ -178,7 +101,6 @@ Object::Object(type type, std::string dir, std::string name, glm::vec3 rot, glm:
 	numIndices = (GLsizei)GetShape().numIndices;
 
 	GetShape().cleanUp();
-	stbi_image_free(data);
 
 	shader.Bind();
 
@@ -222,17 +144,6 @@ unsigned int Object::GetNumIndices()
 {
 	return numIndices;
 }
-
-//void Object::ChangeShape(ShapeData newShape)
-//{
-//	mesh.SetShape(newShape);
-//	Bind();
-//	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-//	glBufferData(GL_ARRAY_BUFFER, mesh.GetShape().vertexBufferSize(), mesh.GetShape().vertices, GL_STATIC_DRAW);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetShape().indexBufferSize(), mesh.GetShape().indices, GL_STATIC_DRAW);
-//	numIndices = (GLsizei)mesh.GetShape().numIndices;
-//}
 
 void Object::SetUniformMat4(const std::string& name, glm::mat4 mat)
 {

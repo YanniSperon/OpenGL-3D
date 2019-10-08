@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include "Mesh.h"
 
 class Camera {
 public:
@@ -27,4 +28,6 @@ public:
 	void MoveUp();
 	void MoveDown();
 	void ChangeMovementSpeed(float newSpeed);
+	void BringWith(Mesh &obj);
+	glm::vec3 GetTranslation();
 };

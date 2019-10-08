@@ -107,3 +107,13 @@ void Camera::ChangeMovementSpeed(float newSpeed)
 {
 	movementSpeed = newSpeed;
 }
+
+void Camera::BringWith(Mesh& obj)
+{
+	obj.TranslateVec3(cameraTranslation);
+}
+
+glm::vec3 Camera::GetTranslation()
+{
+	return cameraTranslation;
+}

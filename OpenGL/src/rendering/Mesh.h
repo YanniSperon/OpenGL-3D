@@ -6,7 +6,7 @@
 
 enum type
 {
-	triangle, cubeModel, blankModel, texturedModel
+	triangle, cubeModel, blankModel, texturedModel, skyBox
 };
 
 class Mesh {
@@ -20,9 +20,9 @@ private:
 	glm::vec3 maxExtents;
 public:
 	Mesh();
-	Mesh(type type, std::string dir, std::string name);
-	Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans);
-	Mesh(type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, const std::string& texDir, const std::string& texName);
+	Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name);
+	Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans);
+	Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords);
 	~Mesh();
 
 	glm::mat4 GetModelTransformMatrix();
