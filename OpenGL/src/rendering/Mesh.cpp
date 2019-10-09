@@ -22,6 +22,9 @@ Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string
 	else if (type == type::texturedModel) {
 		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
 	}
+	else if (type == type::skyBox) {
+		shape = ShapeGenerator::makeSkybox(minExtents, maxExtents);
+	}
 	else {
 		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);
 	}
@@ -38,6 +41,9 @@ Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string
 	}
 	else if (type == type::texturedModel) {
 		shape = ShapeGenerator::loadTexturedShape(dir, name, minExtents, maxExtents);
+	}
+	else if (type == type::skyBox) {
+		shape = ShapeGenerator::makeSkybox(minExtents, maxExtents);
 	}
 	else {
 		shape = ShapeGenerator::makeTriangle(minExtents, maxExtents);

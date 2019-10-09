@@ -21,12 +21,12 @@ public:
 	void DisableMovementControls();
 	glm::mat4 GetViewTransformMatrix();
 	void LookAt(double xpos, double ypos);
-	void MoveForward();
-	void MoveBackward();
-	void StrafeLeft();
-	void StrafeRight();
-	void MoveUp();
-	void MoveDown();
+	void MoveForward(float delta);
+	void MoveBackward(float delta);
+	void StrafeLeft(float delta);
+	void StrafeRight(float delta);
+	void MoveUp(float delta);
+	void MoveDown(float delta);
 	void ChangeMovementSpeed(float newSpeed);
 	void BringWith(Mesh &obj);
 	glm::vec3 GetTranslation();

@@ -55,51 +55,51 @@ void Camera::LookAt(double xpos, double ypos)
 	}
 }
 
-void Camera::MoveForward()
+void Camera::MoveForward(float delta)
 {
 	if (hasControls) {
-		cameraTranslation.x += movementSpeed * viewDirection.x;
-		cameraTranslation.z += movementSpeed * viewDirection.z;
+		cameraTranslation.x += movementSpeed * viewDirection.x * delta;
+		cameraTranslation.z += movementSpeed * viewDirection.z * delta;
 	}
 }
 
-void Camera::MoveBackward()
+void Camera::MoveBackward(float delta)
 {
 	if (hasControls) {
-		cameraTranslation.x += -movementSpeed * viewDirection.x;
-		cameraTranslation.z += -movementSpeed * viewDirection.z;
+		cameraTranslation.x += -movementSpeed * viewDirection.x * delta;
+		cameraTranslation.z += -movementSpeed * viewDirection.z * delta;
 	}
 }
 
-void Camera::StrafeLeft()
+void Camera::StrafeLeft(float delta)
 {
 	if (hasControls) {
 		glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
-		cameraTranslation.x += -movementSpeed * strafeDirection.x;
-		cameraTranslation.z += -movementSpeed * strafeDirection.z;
+		cameraTranslation.x += -movementSpeed * strafeDirection.x * delta;
+		cameraTranslation.z += -movementSpeed * strafeDirection.z * delta;
 	}
 }
 
-void Camera::StrafeRight()
+void Camera::StrafeRight(float delta)
 {
 	if (hasControls) {
 		glm::vec3 strafeDirection = glm::cross(viewDirection, upDirection);
-		cameraTranslation.x += movementSpeed * strafeDirection.x;
-		cameraTranslation.z += movementSpeed * strafeDirection.z;
+		cameraTranslation.x += movementSpeed * strafeDirection.x * delta;
+		cameraTranslation.z += movementSpeed * strafeDirection.z * delta;
 	}
 }
 
-void Camera::MoveUp()
+void Camera::MoveUp(float delta)
 {
 	if (hasControls) {
-		cameraTranslation += movementSpeed * upDirection;
+		cameraTranslation += movementSpeed * upDirection * delta;
 	}
 }
 
-void Camera::MoveDown()
+void Camera::MoveDown(float delta)
 {
 	if (hasControls) {
-		cameraTranslation += -movementSpeed * upDirection;
+		cameraTranslation += -movementSpeed * upDirection * delta;
 	}
 }
 

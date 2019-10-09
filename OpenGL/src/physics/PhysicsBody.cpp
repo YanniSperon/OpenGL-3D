@@ -15,11 +15,16 @@ PhysicsBody::PhysicsBody(glm::vec3 minCorner, glm::vec3 maxCorner, type type, st
 void PhysicsBody::Update(float delta)
 {
 	glm::vec3 translation = GetTranslation();
-	if (translation.y < -5.0f) {
-		TranslateVec3(glm::vec3(translation.x, 20.0f, translation.y));
+	if (translation.y < -50.0f) {
+		TranslateVec3(glm::vec3(translation.x, 50.0f, translation.z));
 	}
-	linearVelocity += gravitationalAcceleration * delta;
+	if (translation.x > 50.0f) {
+		TranslateVec3(glm::vec3(-50.0f, translation.y, translation.z));
+	}
+	linearVelocity += (gravitationalAcceleration * delta) + ((force/mass) * delta);
+	angularVelocity += (torque / momentOfInertia) * delta;
 	TranslateAddVec3(linearVelocity * delta);
+	RotateAddVec3(angularVelocity * delta);
 }
 
 void PhysicsBody::Stop()

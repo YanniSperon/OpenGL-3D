@@ -67,7 +67,7 @@ ShapeData ShapeGenerator::makeCube(glm::vec3& min, glm::vec3& max)
 	float maxX = -INFINITY;
 	float maxY = -INFINITY;
 	float maxZ = -INFINITY;
-	
+
 	ShapeData ret;
 
 	Vertex positions[] = {
@@ -200,6 +200,156 @@ ShapeData ShapeGenerator::makeCube(glm::vec3& min, glm::vec3& max)
 
 		20, 23, 22, // Bottom face
 		21, 20, 22
+	};
+	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
+	ret.indices = new GLuint[ret.numIndices];
+	memcpy(ret.indices, indices, sizeof(indices));
+
+	return ret;
+}
+
+ShapeData ShapeGenerator::makeSkybox(glm::vec3& min, glm::vec3& max)
+{
+	float minX = INFINITY;
+	float minY = INFINITY;
+	float minZ = INFINITY;
+
+	float maxX = -INFINITY;
+	float maxY = -INFINITY;
+	float maxZ = -INFINITY;
+
+	ShapeData ret;
+
+	Vertex positions[] = {
+		glm::vec3(min.x, min.y, min.z), // 0
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, min.y, min.z), // 1
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, min.z), // 2
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(min.x, max.y, min.z), // 3
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f),        // texCoord
+
+
+
+		glm::vec3(max.x, min.y, min.z), // 4
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, min.y, max.z), // 5
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, max.z), // 6
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, min.z), // 7
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f),        // texCoord
+
+
+
+		glm::vec3(min.x, max.y, min.z), // 8
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, min.z), // 9
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, max.z), // 10
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(min.x, max.y, max.z), // 11
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f),        // texCoord
+
+
+
+		glm::vec3(max.x, min.y, max.z), // 12
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(min.x, min.y, max.z), // 13
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(min.x, max.y, max.z), // 14
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(max.x, max.y, max.z), // 15
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f),        // texCoord
+
+
+
+		glm::vec3(min.x, min.y, max.z), // 16
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(min.x, min.y, min.z), // 17
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(min.x, max.y, min.z), // 18
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(min.x, max.y, max.z), // 19
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f),        // texCoord
+
+
+
+		glm::vec3(min.x, min.y, max.z), // 20
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, min.y, max.z), // 21
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +0.0f),        // texCoord
+
+		glm::vec3(max.x, min.y, min.z), // 22
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+1.0f, +1.0f),        // texCoord
+
+		glm::vec3(min.x, min.y, min.z), // 23
+		glm::vec3(+0.0f, +0.0f, +0.0f), // color
+		glm::vec2(+0.0f, +1.0f)         // texCoord
+	};
+
+	ret.numVertices = NUM_ARRAY_ELEMENTS(positions);
+	ret.vertices = new Vertex[ret.numVertices];
+	memcpy(ret.vertices, positions, sizeof(positions));
+
+	GLuint indices[] = {
+		0, 1, 2, // Front face
+		0, 2, 3,
+
+		4, 5, 6, // Right face
+		4, 6, 7,
+
+		8, 9, 10, // Top face
+		8, 10, 11,
+
+		12, 13, 14, // Back face
+		12, 14, 15,
+
+		16, 17, 18, // Left face
+		16, 18, 19,
+
+		22, 23, 20, // Bottom face
+		22, 20, 21
 	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
 	ret.indices = new GLuint[ret.numIndices];

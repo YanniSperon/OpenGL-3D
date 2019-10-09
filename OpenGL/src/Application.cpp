@@ -32,7 +32,7 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 Config config = Config("res/other/", "config.txt");
-#define DGPU
+//#define DGPU
 
 #ifdef DGPU 
 extern "C"
@@ -56,7 +56,7 @@ static bool tPressed = false;
 
 static int oldMouseX = 0;
 static int oldMouseY = 0;
-static float movementSpeed = 0.1f;
+static float movementSpeed = 10.0f;
 
 Camera camera = Camera(true, movementSpeed, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), mouseSensitivity);
 
@@ -209,8 +209,7 @@ int main(void)
 		{
 			hasVR = false;
 			vr_pointer = NULL;
-			printf("Unable to init VR runtime: %s \n",
-				VR_GetVRInitErrorAsEnglishDescription(eError));
+			printf("Unable to init VR runtime: %s \n", VR_GetVRInitErrorAsEnglishDescription(eError));
 		}
 	}
 	
@@ -260,18 +259,16 @@ int main(void)
 		GLuint blankTex = Loader::LoadTexture("res/textures/", "blank.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		GLuint skyboxTex = Loader::LoadTexture("res/textures/", "skybox.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		GLuint glassTex = Loader::LoadTexture("res/textures/", "glass.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
-		GLuint glassTestTex = Loader::LoadTexture("res/textures/", "glasstest.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		
 		Object object = Object(glm::vec3(-5.0f, -5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), type::blankModel, "res/models/", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, 0.0f), blankTex, shader.GetShaderID());
-		Object skybox = Object(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec3(50.0f, 50.0f, 50.0f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, 0.0f), skyboxTex, shader.GetShaderID());
-		PhysicsBody object1 = PhysicsBody(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), type::texturedModel, "res/models/", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), new4kTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
+		Object skybox = Object(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec3(50.0f, 50.0f, 50.0f), type::skyBox, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), skyboxTex, shader.GetShaderID());
+		PhysicsBody object1 = PhysicsBody(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), type::texturedModel, "res/models/", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-50.0f, 0.0f, 0.0f), new4kTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 2.5f, 0.0f), 1.0f, glm::vec3(5.0f, 0.0f, 0.0f));
 		AABBCollidable object2 = AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sphereCowTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 		std::vector<AABBCollidable> objects;
 		for (unsigned int i = 0; i < 10; i++) {
 			objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), sphereCowTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
 		}
 		AABBCollidable object3 = AABBCollidable(glm::vec3(-2.5f, -2.5f, -0.125f), glm::vec3(2.5f, 2.5f, 0.125f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 5.0f, 7.0f), glassTex, glassShader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
-		AABBCollidable object4 = AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 5.0f, 1.0f), glassTestTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 
@@ -306,22 +303,22 @@ int main(void)
 			float deltaTime = (float)deltaT * timeConstant;
 
 			if (wPressed) {
-				camera.MoveForward();
+				camera.MoveForward(deltaTime);
 			}
 			if (sPressed) {
-				camera.MoveBackward();
+				camera.MoveBackward(deltaTime);
 			}
 			if (aPressed) {
-				camera.StrafeLeft();
+				camera.StrafeLeft(deltaTime);
 			}
 			if (dPressed) {
-				camera.StrafeRight();
+				camera.StrafeRight(deltaTime);
 			}
 			if (spacePressed) {
-				camera.MoveUp();
+				camera.MoveUp(deltaTime);
 			}
 			if (controlPressed) {
-				camera.MoveDown();
+				camera.MoveDown(deltaTime);
 			}
 			if (tPressed) {
 				//engine->play2D(jumpSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
@@ -354,7 +351,6 @@ int main(void)
 				renderer.submit(&objects[i], camPos);
 			}
 			renderer.submit(&object3, camPos);
-			renderer.submit(&object4, camPos);
 			
 			if (hasVR) {
 				vr::TrackedDevicePose_t trackedDevicePose;
