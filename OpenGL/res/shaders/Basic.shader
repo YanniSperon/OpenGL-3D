@@ -5,14 +5,15 @@ in layout(location = 0) vec3 position;
 in layout(location = 1) vec3 color;
 in layout(location = 2) vec2 texCoord;
 
-uniform mat4 MVP;
+uniform mat4 VP;
+uniform mat4 M;
 
 out vec3 u_Color;
 out vec2 u_TexCoord;
 
 void main()
 {
-	gl_Position = MVP * vec4(position, 1.0);
+	gl_Position = VP * M * vec4(position, 1.0);
 	u_Color = color;
 	u_TexCoord = texCoord;
 }

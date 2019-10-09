@@ -1,7 +1,20 @@
+#choose whether the application will launch in fullscreen or not
 fullscreen=false
+
+#choose whether the application will attempt to connect to any available vr headset or not
 vr=false
+
+#choose the starting width of the window in pixels
 initialWidth=1920
+
+#choose the starting height of the window in pixels
 initialHeight=1080
+
+#choose the sensitivity, it is radian based so 0.005 is recommended.
 mouseSensitivity=0.005f
+
+#choose the starting fov
 FOV=90.0f
+
+#enable vsync (1-yes/0-no)
 vsync=1

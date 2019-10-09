@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 #include "glm/glm.hpp"
 #include "Camera.h"
+#include "Shader.h"
 
 class Renderer2D {
 public:

@@ -23,10 +23,10 @@ void Config::LoadConfig(std::string dir, std::string name)
 {
 	fullscreen = false;
 	vr = false;
-	initialWidth = 1280;
-	initialHeight = 720;
-	mouseSensitivity = 0.01f;
-	FOV = 60.0f;
+	initialWidth = 1920;
+	initialHeight = 1080;
+	mouseSensitivity = 0.005f;
+	FOV = 90.0f;
 	vsync = 1;
 	
 	std::ifstream f(dir + name);
@@ -40,7 +40,9 @@ void Config::LoadConfig(std::string dir, std::string name)
 		std::string line;
 		std::getline(f, line);
 
-		if (line.find("fullscreen=") != std::string::npos) {
+		if (line.find("#") != std::string::npos || line.size() == 0) {
+		}
+		else if (line.find("fullscreen=") != std::string::npos) {
 			std::string value = line.substr(11);
 			if (value == "true") {
 				fullscreen = true;

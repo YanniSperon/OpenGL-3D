@@ -60,9 +60,9 @@ ShapeData ShapeGenerator::makeTriangle(glm::vec3& min, glm::vec3& max) {
 
 ShapeData ShapeGenerator::makeCube(glm::vec3& min, glm::vec3& max)
 {
-	float minX = -INFINITY;
-	float minY = -INFINITY;
-	float minZ = -INFINITY;
+	float minX = INFINITY;
+	float minY = INFINITY;
+	float minZ = INFINITY;
 
 	float maxX = -INFINITY;
 	float maxY = -INFINITY;
@@ -441,9 +441,9 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 
 ShapeData ShapeGenerator::makeSkybox(glm::vec3& min, glm::vec3& max, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords)
 {
-	float minX = -INFINITY;
-	float minY = -INFINITY;
-	float minZ = -INFINITY;
+	float minX = INFINITY;
+	float minY = INFINITY;
+	float minZ = INFINITY;
 
 	float maxX = -INFINITY;
 	float maxY = -INFINITY;

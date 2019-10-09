@@ -32,11 +32,14 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 Config config = Config("res/other/", "config.txt");
+#define DGPU
 
+#ifdef DGPU 
 extern "C"
 {
 	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 }
+#endif
 
 static bool fullscreen = config.getFullscreenPreference();
 static float mouseSensitivity = config.getMouseSensitivityPreference();
@@ -190,7 +193,7 @@ int main(void)
 
 	glfwMakeContextCurrent(window);
 
-	glfwSwapInterval(VSyncPreference); // change to 1 to disable vsync
+	glfwSwapInterval(VSyncPreference);
 
 	if (glewInit() != GLEW_OK) {
 		printf("Error!\n");
@@ -220,22 +223,20 @@ int main(void)
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
-		//const char* attackSFXFilename = "res/audio/sfx/attack.wav";
-		//const char* explosionSFXFilename = "res/audio/sfx/explosion.wav";
-		//const char* jumpSFXFilename = "res/audio/sfx/jump.wav";
-		//const char* pickupSFXFilename = "res/audio/sfx/pickup.wav";
-		//const char* selectSFXFilename = "res/audio/sfx/select.wav";
-		//const char* shootSFXFilename = "res/audio/sfx/shoot.wav";
-		//const char* steamSFXFilename = "res/audio/sfx/steam.wav";
+		const char* attackSFXFilename = "res/audio/sfx/attack.wav";
+		const char* explosionSFXFilename = "res/audio/sfx/explosion.wav";
+		const char* jumpSFXFilename = "res/audio/sfx/jump.wav";
+		const char* pickupSFXFilename = "res/audio/sfx/pickup.wav";
+		const char* selectSFXFilename = "res/audio/sfx/select.wav";
+		const char* shootSFXFilename = "res/audio/sfx/shoot.wav";
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
-		//engine->setSoundVolume(0);
-		//irrklang::ISound* attackSFX = engine->play2D(attackSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* explosionSFX = engine->play2D(explosionSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* jumpSFX = engine->play2D(jumpSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* pickupSFX = engine->play2D(pickupSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* selectSFX = engine->play2D(selectSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* shootSFX = engine->play2D(shootSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
-		//irrklang::ISound* steamSFX = engine->play2D(steamSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		engine->setSoundVolume(0);
+		irrklang::ISound* attackSFX = engine->play2D(attackSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		irrklang::ISound* explosionSFX = engine->play2D(explosionSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		irrklang::ISound* jumpSFX = engine->play2D(jumpSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		irrklang::ISound* pickupSFX = engine->play2D(pickupSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		irrklang::ISound* selectSFX = engine->play2D(selectSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
+		irrklang::ISound* shootSFX = engine->play2D(shootSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
 		//engine->play2D(steamSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
 		glEnable(GL_BLEND);
@@ -245,6 +246,8 @@ int main(void)
 
 		Simple2DRenderer renderer;
 
+		Shader shader("res/shaders/Basic.shader");
+
 		GLuint sphereCowTex = Loader::LoadTexture("res/textures/", "newcow.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		GLuint radaTex = Loader::LoadTexture("res/textures/", "rada.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		GLuint radaradaTex = Loader::LoadTexture("res/textures/", "radarada.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
@@ -252,22 +255,34 @@ int main(void)
 		GLuint blankTex = Loader::LoadTexture("res/textures/", "blank.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		GLuint skyboxTex = Loader::LoadTexture("res/textures/", "skybox.png", GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 		
-		Object object = Object(glm::vec3(-5.0f, -5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), type::blankModel, "res/models/", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, 0.0f), blankTex);
-		Object skybox = Object(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec3(50.0f, 50.0f, 50.0f), type::skyBox, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), skyboxTex, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		PhysicsBody object1 = PhysicsBody(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), type::texturedModel, "res/models/", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), new4kTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
-		AABBCollidable object2 = AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+		Object object = Object(glm::vec3(-5.0f, -5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), type::blankModel, "res/models/", "plane.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -3.0f, 0.0f), blankTex, shader.GetShaderID());
+		Object skybox = Object(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec3(50.0f, 50.0f, 50.0f), type::skyBox, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), skyboxTex, shader.GetShaderID(), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		PhysicsBody object1 = PhysicsBody(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), type::texturedModel, "res/models/", "new.obj", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), new4kTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, -9.807f, 0.0f));
+		AABBCollidable object2 = AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sphereCowTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 		std::vector<AABBCollidable> objects;
-		for (unsigned int i = 0; i < 50; i++) {
+		int valueX = 0;
+		int valueY = 0;
+		int valueZ = 0;
+		for (unsigned int i = 0; i < 10000; i++) {
 			int val = (float)((rand() / (float)RAND_MAX * 3));
 			if (val == 0) {
-				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(valueX, valueY, valueZ), sphereCowTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
 			} else if (val == 1) {
-				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), radaTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(valueX, valueY, valueZ), radaTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
 			} else if (val == 2) {
-				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(i, 0.0f, 0.0f), radaradaTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+				objects.push_back(AABBCollidable(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(valueX, valueY, valueZ), radaradaTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+			}
+			valueX++;
+			if (valueX == 10) {
+				valueX = 0;
+				valueY++;
+			}
+			if (valueY == 10) {
+				valueY = 0;
+				valueZ++;
 			}
 		}
-		AABBCollidable object3 = AABBCollidable(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, 0.0f), sphereCowTex, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+		AABBCollidable object3 = AABBCollidable(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), type::cubeModel, "", "", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 5.0f, 0.0f), sphereCowTex, shader.GetShaderID(), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 
@@ -288,6 +303,7 @@ int main(void)
 		float timeConstant = 1.0f;
 		double lastTime = glfwGetTime();
 		double deltaT = 0, nowTime = 0;
+		engine->setSoundVolume(1);
 		
 		while (!glfwWindowShouldClose(window))
 		{
@@ -319,6 +335,7 @@ int main(void)
 				camera.MoveDown();
 			}
 			if (tPressed) {
+				//engine->play2D(jumpSFXFilename, false, false, false, irrklang::ESM_AUTO_DETECT, false);
 				printf("Linear Acceleration:(%f, %f, %f)\nLinear Velocity: (%f, %f, %f)\n", object1.GetLinearAcceleration().x, object1.GetLinearAcceleration().y, object1.GetLinearAcceleration().z, object1.GetLinearVelocity().x, object1.GetLinearVelocity().y, object1.GetLinearVelocity().z);
 				object1.Stop();
 			}

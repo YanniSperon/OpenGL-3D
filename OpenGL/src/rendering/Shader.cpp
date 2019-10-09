@@ -1,5 +1,4 @@
 #include "Shader.h"
-#include "GL/glew.h"
 
 #include <iostream>
 #include <fstream>
@@ -145,6 +144,11 @@ void Shader::SetUniformVec3f(const std::string& name, const glm::vec3& vector)
 void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
 {
 	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
+}
+
+GLuint Shader::GetShaderID()
+{
+	return m_RendererID;
 }
 
 int Shader::GetUniformLocation(const std::string& name)
