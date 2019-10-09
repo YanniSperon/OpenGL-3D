@@ -44,16 +44,6 @@ Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string
 	}
 }
 
-Mesh::Mesh(glm::vec3 min, glm::vec3 max, type type, std::string dir, std::string name, glm::vec3 rot, glm::vec3 trans, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords)
-{
-	if (type == type::skyBox) {
-		shape = ShapeGenerator::makeSkybox(minExtents, maxExtents, topTexCoords, bottomTexCoords, leftTexCoords, rightTexCoords, frontTexCoords, backTexCoords);
-	}
-	else {
-		printf("Error: Using skybox constructor without skybox\n");
-	}
-}
-
 Mesh::~Mesh()
 {
 

@@ -183,23 +183,23 @@ ShapeData ShapeGenerator::makeCube(glm::vec3& min, glm::vec3& max)
 	memcpy(ret.vertices, positions, sizeof(positions));
 
 	GLuint indices[] = {
-		0, 1, 2, // Front face
-		0, 2, 3,
+		2, 1, 0, // Front face
+		3, 2, 0,
 
-		4, 5, 6, // Right face
-		4, 6, 7,
+		6, 5, 4, // Right face
+		7, 6, 4,
 
-		8, 9, 10, // Top face
-		8, 10, 11,
+		10, 9, 8, // Top face
+		11, 10, 8,
 
-		12, 13, 14, // Back face
-		12, 14, 15,
+		14, 13, 12, // Back face
+		15, 14, 12,
 
-		16, 17, 18, // Left face
-		16, 18, 19,
+		18, 17, 16, // Left face
+		19, 18, 16,
 
-		20, 22, 21, // Bottom face
-		20, 23, 22
+		20, 23, 22, // Bottom face
+		21, 20, 22
 	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
 	ret.indices = new GLuint[ret.numIndices];
@@ -435,162 +435,6 @@ ShapeData ShapeGenerator::loadTexturedShape(std::string directory, std::string n
 	for (unsigned int k = 0; k < indicesSize; k++) {
 		ret.indices[k] = indices[k];
 	}
-
-	return ret;
-}
-
-ShapeData ShapeGenerator::makeSkybox(glm::vec3& min, glm::vec3& max, glm::vec4 topTexCoords, glm::vec4 bottomTexCoords, glm::vec4 leftTexCoords, glm::vec4 rightTexCoords, glm::vec4 frontTexCoords, glm::vec4 backTexCoords)
-{
-	float minX = INFINITY;
-	float minY = INFINITY;
-	float minZ = INFINITY;
-
-	float maxX = -INFINITY;
-	float maxY = -INFINITY;
-	float maxZ = -INFINITY;
-
-	ShapeData ret;
-
-	Vertex positions[] = {
-		// FRONT
-		glm::vec3(min.x, min.y, min.z), // 0
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(frontTexCoords.x, frontTexCoords.y), // texCoord
-
-		glm::vec3(max.x, min.y, min.z), // 1
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(frontTexCoords.z, frontTexCoords.y), // texCoord
-
-		glm::vec3(max.x, max.y, min.z), // 2
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(frontTexCoords.z, frontTexCoords.w), // texCoord
-
-		glm::vec3(min.x, max.y, min.z), // 3
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(frontTexCoords.x, frontTexCoords.w), // texCoord
-
-
-
-		// RIGHT
-		glm::vec3(max.x, min.y, min.z), // 4
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(rightTexCoords.x, rightTexCoords.y), // texCoord
-
-		glm::vec3(max.x, min.y, max.z), // 5
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(rightTexCoords.z, rightTexCoords.y), // texCoord
-
-		glm::vec3(max.x, max.y, max.z), // 6
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(rightTexCoords.z, rightTexCoords.w), // texCoord
-
-		glm::vec3(max.x, max.y, min.z), // 7
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(rightTexCoords.x, rightTexCoords.w), // texCoord
-
-
-
-		// TOP
-		glm::vec3(min.x, max.y, min.z), // 8
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(topTexCoords.x, topTexCoords.y), // texCoord
-
-		glm::vec3(max.x, max.y, min.z), // 9
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(topTexCoords.z, topTexCoords.y), // texCoord
-
-		glm::vec3(max.x, max.y, max.z), // 10
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(topTexCoords.z, topTexCoords.w), // texCoord
-
-		glm::vec3(min.x, max.y, max.z), // 11
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(topTexCoords.x, topTexCoords.w), // texCoord
-
-
-
-		// BACK
-		glm::vec3(max.x, min.y, max.z), // 12
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(backTexCoords.x, backTexCoords.y), // texCoord
-
-		glm::vec3(min.x, min.y, max.z), // 13
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(backTexCoords.z, backTexCoords.y), // texCoord
-
-		glm::vec3(min.x, max.y, max.z), // 14
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(backTexCoords.z, backTexCoords.w), // texCoord
-
-		glm::vec3(max.x, max.y, max.z), // 15
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(backTexCoords.x, backTexCoords.w), // texCoord
-
-
-
-		// LEFT
-		glm::vec3(min.x, min.y, max.z), // 16
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(leftTexCoords.x, leftTexCoords.y), // texCoord
-
-		glm::vec3(min.x, min.y, min.z), // 17
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(leftTexCoords.z, leftTexCoords.y), // texCoord
-
-		glm::vec3(min.x, max.y, min.z), // 18
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(leftTexCoords.z, leftTexCoords.w), // texCoord
-
-		glm::vec3(min.x, max.y, max.z), // 19
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(leftTexCoords.x, leftTexCoords.w), // texCoord
-
-
-
-		// BOTTOM
-		glm::vec3(min.x, min.y, max.z), // 20
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(bottomTexCoords.x, bottomTexCoords.y), // texCoord
-
-		glm::vec3(max.x, min.y, max.z), // 21
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(bottomTexCoords.z, bottomTexCoords.y), // texCoord
-
-		glm::vec3(max.x, min.y, min.z), // 22
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(bottomTexCoords.z, bottomTexCoords.w), // texCoord
-
-		glm::vec3(min.x, min.y, min.z), // 23
-		glm::vec3(+0.0f, +0.0f, +0.0f), // color
-		glm::vec2(bottomTexCoords.x, bottomTexCoords.w), // texCoord
-	};
-
-	ret.numVertices = NUM_ARRAY_ELEMENTS(positions);
-	ret.vertices = new Vertex[ret.numVertices];
-	memcpy(ret.vertices, positions, sizeof(positions));
-
-	GLuint indices[] = {
-		0, 1, 2, // Front face
-		0, 2, 3,
-
-		4, 5, 6, // Right face
-		4, 6, 7,
-
-		8, 9, 10, // Top face
-		8, 10, 11,
-
-		12, 13, 14, // Back face
-		12, 14, 15,
-
-		16, 17, 18, // Left face
-		16, 18, 19,
-
-		20, 22, 21, // Bottom face
-		20, 23, 22
-	};
-	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
-	ret.indices = new GLuint[ret.numIndices];
-	memcpy(ret.indices, indices, sizeof(indices));
 
 	return ret;
 }

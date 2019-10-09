@@ -418,6 +418,7 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="imgui.ini" />
+    <None Include="res\shaders\Window.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vendor\glm\detail\_features.hpp">
